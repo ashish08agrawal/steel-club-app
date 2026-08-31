@@ -40,7 +40,8 @@
     .nav-links a.active, .nav-links a:hover { color: var(--gold-light); }
 
     /* Buttons */
-    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 9px 20px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 9px 20px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s; }
+    .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline { background: transparent; color: var(--gold-light); border: 1px solid var(--gold-primary); padding: 9px 20px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
     .btn-danger { background: rgba(220,53,69,0.2); border: 1px solid var(--danger); color: #ff808a; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
 
@@ -48,7 +49,7 @@
     .tab-content { display: none; padding-top: 95px; min-height: 85vh; }
     .tab-content.active-tab { display: block; }
 
-    /* Flash Notice Modal */
+    /* Flash Modal */
     .flash-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; }
     .flash-modal-box { background: var(--bg-surface); border: 2px solid var(--gold-primary); border-radius: 12px; max-width: 550px; width: 100%; position: relative; overflow: hidden; box-shadow: 0 0 40px rgba(212,175,55,0.3); }
     .flash-close { position: absolute; top: 12px; right: 14px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--border-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
@@ -113,7 +114,7 @@
   <main id="tab-home" class="tab-content active-tab">
     <div class="container" style="padding: 80px 0;">
       <h1 class="brand-font" style="font-size: 3rem; margin-bottom: 16px;">Excellence, Heritage & Distinction</h1>
-      <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 24px;">Welcome to Steel Club Durgapur. The premier club for executive leisure, celebrations, banquets, and guest cottages.</p>
+      <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 24px;">Welcome to Steel Club Durgapur. The premier hub for executive leisure, celebrations, banquets, and guest cottages.</p>
       <button class="btn-gold" onclick="showTab('availability')">Check Availability</button>
     </div>
   </main>
@@ -126,7 +127,7 @@
     </div>
   </section>
 
-  <!-- TAB 3: EVENTS (UPCOMING vs PAST) -->
+  <!-- TAB 3: EVENTS -->
   <section id="tab-events" class="tab-content">
     <div class="container" style="padding: 40px 0;">
       <div style="display:flex; justify-content:center; gap: 14px; margin-bottom: 30px;">
@@ -155,7 +156,7 @@
           <select id="bk_venue" class="form-control" required></select>
           <input type="date" id="bk_date" class="form-control" required />
           <input type="text" id="bk_purpose" class="form-control" placeholder="Purpose (e.g. Family Get-Together)" required />
-          <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">Confirm Booking</button>
+          <button type="submit" id="bk_submit_btn" class="btn-gold" style="width: 100%; justify-content: center;">Confirm Booking</button>
         </form>
       </div>
     </div>
@@ -182,7 +183,7 @@
             <select id="ad_bk_venue" class="form-control" required></select>
             <input type="date" id="ad_bk_date" class="form-control" required />
             <input type="text" id="ad_bk_purpose" class="form-control" placeholder="Purpose" required />
-            <button type="submit" class="btn-gold" style="height: 42px;">Save Booking</button>
+            <button type="submit" id="ad_bk_submit_btn" class="btn-gold" style="height: 42px; justify-content: center;">Save Booking</button>
           </form>
         </div>
         <h3 class="brand-font" style="margin-top: 24px;">All Booking Records</h3>
@@ -202,15 +203,15 @@
             <input type="text" id="ad_ev_title" class="form-control" placeholder="Event Title" required />
             <input type="date" id="ad_ev_date" class="form-control" required />
             <textarea id="ad_ev_desc" class="form-control" placeholder="Event Description" rows="3" required></textarea>
-            <input type="url" id="ad_ev_poster" class="form-control" placeholder="Poster Image URL (Cloudinary / ImgBB direct link)" />
+            <input type="url" id="ad_ev_poster" class="form-control" placeholder="Artistic Poster Image URL (Direct .jpg / .png link)" />
             <input type="url" id="ad_ev_drive" class="form-control" placeholder="Google Drive Folder Link for Full Photo/Video Download" />
-            <input type="text" id="ad_ev_gallery" class="form-control" placeholder="Collage Image URLs (comma separated links)" />
-            <button type="submit" class="btn-gold">Publish Event</button>
+            <input type="text" id="ad_ev_gallery" class="form-control" placeholder="Collage Image URLs (comma separated direct links)" />
+            <button type="submit" id="ad_ev_submit_btn" class="btn-gold">Publish Event</button>
           </form>
         </div>
         <h3 class="brand-font" style="margin-top: 24px;">Existing Events</h3>
         <table class="data-table">
-          <thead><tr><th>Date</th><th>Title</th><th>Type</th><th>Action</th></tr></thead>
+          <thead><tr><th>Date</th><th>Title</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="admin-events-list"></tbody>
         </table>
       </div>
@@ -227,7 +228,7 @@
             <input type="date" id="fl_start" class="form-control" required />
             <label style="font-size:0.75rem; color:var(--gold-light);">Active To Date:</label>
             <input type="date" id="fl_end" class="form-control" required />
-            <button type="submit" class="btn-gold">Schedule Announcement</button>
+            <button type="submit" id="fl_submit_btn" class="btn-gold">Schedule Announcement</button>
           </form>
         </div>
       </div>
@@ -242,14 +243,14 @@
       <form onsubmit="handleLogin(event)">
         <input type="text" id="log_user" class="form-control" placeholder="Member ID or Username (e.g. SC-1001 or admin)" required />
         <input type="password" id="log_pass" class="form-control" placeholder="Password" required />
-        <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">Sign In</button>
+        <button type="submit" id="log_btn" class="btn-gold" style="width: 100%; justify-content: center;">Sign In</button>
       </form>
       <div style="border-top: 1px solid var(--border-subtle); margin-top: 20px; padding-top: 14px;">
         <small style="color:var(--text-muted); cursor:pointer;" onclick="togglePasswordChange()">Need to change your password?</small>
         <form id="change-pass-form" style="display:none; margin-top:10px;" onsubmit="handleChangePassword(event)">
           <input type="password" id="cp_old" class="form-control" placeholder="Current Password" required />
           <input type="password" id="cp_new" class="form-control" placeholder="New Password" required />
-          <button type="submit" class="btn-outline" style="width: 100%; justify-content: center;">Update Password</button>
+          <button type="submit" id="cp_btn" class="btn-outline" style="width: 100%; justify-content: center;">Update Password</button>
         </form>
       </div>
     </div>
@@ -261,22 +262,20 @@
     let allVenues = [];
     let currentEvView = 'upcoming';
 
-    // 1. Navigation & Tabs
     function showTab(id) {
       document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active-tab'));
       document.querySelectorAll('.nav-links a').forEach(e => e.classList.remove('active'));
       document.getElementById('tab-' + id).classList.add('active-tab');
       if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
       if (id === 'facilities' || id === 'availability' || id === 'admin') fetchVenuesAndAvailability();
-      if (id === 'events') fetchEvents();
+      if (id === 'events' || id === 'admin') fetchEvents();
     }
 
-    // 2. Scheduled Flash Notice Check on Page Load
     async function checkFlashNotice() {
       try {
         const res = await fetch('/api/active-flash-notice');
         const notice = await res.json();
-        if (notice) {
+        if (notice && notice.title) {
           document.getElementById('flash-title').innerText = notice.title;
           document.getElementById('flash-message').innerText = notice.message;
           if (notice.image_url) {
@@ -290,7 +289,6 @@
     }
     function closeFlashModal() { document.getElementById('flashModal').style.display = 'none'; }
 
-    // 3. Authentication
     function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
     function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
     function togglePasswordChange() {
@@ -300,43 +298,54 @@
 
     async function handleLogin(e) {
       e.preventDefault();
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          username: document.getElementById('log_user').value,
-          password: document.getElementById('log_pass').value
-        })
-      });
-      if (res.ok) {
-        currentUser = await res.json();
-        closeLoginModal();
-        updateAuthUI();
-        if (currentUser.role === 'admin') {
-          showTab('admin');
+      const btn = document.getElementById('log_btn');
+      btn.disabled = true;
+      btn.innerText = 'Signing In...';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: document.getElementById('log_user').value,
+            password: document.getElementById('log_pass').value
+          })
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          closeLoginModal();
+          updateAuthUI();
+          if (currentUser.role === 'admin') showTab('admin');
+          else showTab('availability');
         } else {
-          showTab('availability');
+          alert('Invalid credentials');
         }
-      } else {
-        alert('Invalid credentials');
+      } catch (err) { alert('Connection error'); }
+      finally {
+        btn.disabled = false;
+        btn.innerText = 'Sign In';
       }
     }
 
     async function handleChangePassword(e) {
       e.preventDefault();
       if (!currentUser) return alert('Please login first');
-      const res = await fetch('/api/change-password', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          username: currentUser.username,
-          current_password: document.getElementById('cp_old').value,
-          new_password: document.getElementById('cp_new').value
-        })
-      });
-      const data = await res.json();
-      if (res.ok) { alert('Password successfully changed'); closeLoginModal(); }
-      else alert(data.detail);
+      const btn = document.getElementById('cp_btn');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/change-password', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: currentUser.username,
+            current_password: document.getElementById('cp_old').value,
+            new_password: document.getElementById('cp_new').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) { alert('Password successfully changed'); closeLoginModal(); }
+        else alert(data.detail);
+      } catch (err) { alert('Error changing password'); }
+      finally { btn.disabled = false; }
     }
 
     function updateAuthUI() {
@@ -352,12 +361,14 @@
     }
     function logout() { currentUser = null; location.reload(); }
 
-    // 4. Events & Dynamic Shifts
+    // Events
     async function fetchEvents() {
-      const res = await fetch('/api/events');
-      allEvents = await res.json();
-      renderEvents();
-      renderAdminEvents();
+      try {
+        const res = await fetch('/api/events');
+        allEvents = await res.json();
+        renderEvents();
+        renderAdminEvents();
+      } catch (err) { console.error('Error fetching events:', err); }
     }
 
     function toggleEventView(view) {
@@ -373,7 +384,7 @@
       const filtered = allEvents.filter(e => currentEvView === 'upcoming' ? e.event_date >= today : e.event_date < today);
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<p style="color:var(--text-muted)">No ${currentEvView} events found.</p>`;
+        grid.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1;">No ${currentEvView} events found.</p>`;
         return;
       }
 
@@ -397,91 +408,122 @@
       }).join('');
     }
 
-    // 5. Live Venue Availability & Matrix
+    // Availability & Bookings
     async function fetchVenuesAndAvailability() {
-      const res = await fetch('/api/venues-availability');
-      const { venues, bookings } = await res.json();
-      allVenues = venues;
+      try {
+        const res = await fetch('/api/venues-availability');
+        const { venues, bookings } = await res.json();
+        allVenues = venues;
 
-      // Populate Dropdowns
-      const options = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
-      document.getElementById('bk_venue').innerHTML = options;
-      document.getElementById('ad_bk_venue').innerHTML = options;
+        const options = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
+        document.getElementById('bk_venue').innerHTML = options;
+        document.getElementById('ad_bk_venue').innerHTML = options;
 
-      // Render Facilities
-      document.getElementById('facilities-grid').innerHTML = venues.map(v => `
-        <div class="luxury-card">
-          <h3 class="brand-font" style="color:var(--gold-light);">${v.name}</h3>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Category: ${v.category}</p>
-          <p>Capacity: Up to ${v.capacity} Guests</p>
-        </div>
-      `).join('');
+        document.getElementById('facilities-grid').innerHTML = venues.map(v => `
+          <div class="luxury-card">
+            <h3 class="brand-font" style="color:var(--gold-light);">${v.name}</h3>
+            <p style="color:var(--text-muted); font-size:0.85rem;">Category: ${v.category}</p>
+            <p>Capacity: Up to ${v.capacity} Guests</p>
+          </div>
+        `).join('');
 
-      // Generate 7-Day Matrix
-      const dates = [];
-      const today = new Date();
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(); d.setDate(today.getDate() + i);
-        dates.push(d.toISOString().split('T')[0]);
-      }
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(); d.setDate(today.getDate() + i);
+          dates.push(d.toISOString().split('T')[0]);
+        }
 
-      document.getElementById('avail-head').innerHTML = `<tr><th>Venue</th>${dates.map(d => `<th>${d.slice(5)}</th>`).join('')}</tr>`;
-      document.getElementById('avail-body').innerHTML = venues.map(v => `
-        <tr>
-          <td><strong>${v.name}</strong></td>
-          ${dates.map(d => {
-            const isBooked = bookings.some(b => b.venue_id === v.id && b.booking_date.startsWith(d));
-            return `<td><span style="color:${isBooked ? 'var(--booked-color)' : 'var(--available-color)'}; font-weight:700;">${isBooked ? 'Booked' : 'Open'}</span></td>`;
-          }).join('')}
-        </tr>
-      `).join('');
+        document.getElementById('avail-head').innerHTML = `<tr><th>Venue</th>${dates.map(d => `<th>${d.slice(5)}</th>`).join('')}</tr>`;
+        document.getElementById('avail-body').innerHTML = venues.map(v => `
+          <tr>
+            <td><strong>${v.name}</strong></td>
+            ${dates.map(d => {
+              const isBooked = bookings.some(b => b.venue_id === v.id && b.booking_date.startsWith(d));
+              return `<td><span style="color:${isBooked ? 'var(--booked-color)' : 'var(--available-color)'}; font-weight:700;">${isBooked ? 'Booked' : 'Open'}</span></td>`;
+            }).join('')}
+          </tr>
+        `).join('');
 
-      // Render Admin Bookings List
-      document.getElementById('admin-bookings-list').innerHTML = bookings.map(b => `
-        <tr>
-          <td>${b.booking_date}</td>
-          <td>${b.venue_name}</td>
-          <td>${b.booker_name}</td>
-          <td>${b.member_id}</td>
-          <td>${b.purpose}</td>
-          <td><button class="btn-danger" onclick="deleteBooking(${b.id})">Delete</button></td>
-        </tr>
-      `).join('');
+        document.getElementById('admin-bookings-list').innerHTML = bookings.map(b => `
+          <tr>
+            <td>${b.booking_date}</td>
+            <td>${b.venue_name}</td>
+            <td>${b.booker_name || ''}</td>
+            <td>${b.member_id || ''}</td>
+            <td>${b.purpose || ''}</td>
+            <td><button class="btn-danger" onclick="deleteBooking(${b.id})">Delete</button></td>
+          </tr>
+        `).join('');
+      } catch (err) { console.error('Error loading venues:', err); }
     }
 
-    // 6. Booking Actions
+    // Single Booking Submit Handler with Button Disabling
     async function submitBooking(e) {
       e.preventDefault();
-      await fetch('/api/book-venue', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          booker_name: document.getElementById('bk_name').value,
-          member_id: document.getElementById('bk_member').value,
-          venue_name: document.getElementById('bk_venue').value,
-          booking_date: document.getElementById('bk_date').value,
-          purpose: document.getElementById('bk_purpose').value
-        })
-      });
-      alert('Booking submitted successfully!');
-      fetchVenuesAndAvailability();
+      const btn = document.getElementById('bk_submit_btn');
+      btn.disabled = true;
+      btn.innerText = 'Processing Reservation...';
+
+      try {
+        const res = await fetch('/api/book-venue', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            booker_name: document.getElementById('bk_name').value,
+            member_id: document.getElementById('bk_member').value,
+            venue_name: document.getElementById('bk_venue').value,
+            booking_date: document.getElementById('bk_date').value,
+            purpose: document.getElementById('bk_purpose').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Booking confirmed and recorded!');
+          fetchVenuesAndAvailability();
+        } else {
+          alert(data.detail || 'Booking failed.');
+        }
+      } catch (err) {
+        alert('Network error while processing booking.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Confirm Booking';
+      }
     }
 
+    // Admin Create Booking Handler with Button Disabling
     async function adminCreateBooking(e) {
       e.preventDefault();
-      await fetch('/api/book-venue', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          booker_name: document.getElementById('ad_bk_name').value,
-          member_id: document.getElementById('ad_bk_member').value,
-          venue_name: document.getElementById('ad_bk_venue').value,
-          booking_date: document.getElementById('ad_bk_date').value,
-          purpose: document.getElementById('ad_bk_purpose').value
-        })
-      });
-      alert('Admin booking created');
-      fetchVenuesAndAvailability();
+      const btn = document.getElementById('ad_bk_submit_btn');
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+
+      try {
+        const res = await fetch('/api/book-venue', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            booker_name: document.getElementById('ad_bk_name').value,
+            member_id: document.getElementById('ad_bk_member').value,
+            venue_name: document.getElementById('ad_bk_venue').value,
+            booking_date: document.getElementById('ad_bk_date').value,
+            purpose: document.getElementById('ad_bk_purpose').value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Offline/Admin booking recorded successfully!');
+          fetchVenuesAndAvailability();
+        } else {
+          alert(data.detail || 'Could not save booking.');
+        }
+      } catch (err) {
+        alert('Error saving booking.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Booking';
+      }
     }
 
     async function deleteBooking(id) {
@@ -491,7 +533,7 @@
       }
     }
 
-    // 7. Admin Event & Flash Management
+    // Admin Event Save Handler with Button Disabling & Instant Refresh
     function showAdminSection(sec) {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
@@ -501,30 +543,54 @@
 
     async function adminSaveEvent(e) {
       e.preventDefault();
+      const btn = document.getElementById('ad_ev_submit_btn');
+      btn.disabled = true;
+      btn.innerText = 'Publishing Event...';
+
       const gallery = document.getElementById('ad_ev_gallery').value;
-      await fetch('/api/admin/events', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          title: document.getElementById('ad_ev_title').value,
-          event_date: document.getElementById('ad_ev_date').value,
-          description: document.getElementById('ad_ev_desc').value,
-          poster_url: document.getElementById('ad_ev_poster').value,
-          drive_link: document.getElementById('ad_ev_drive').value,
-          gallery_urls: gallery ? gallery.split(',').map(s => s.trim()) : []
-        })
-      });
-      alert('Event saved!');
-      fetchEvents();
+      try {
+        const res = await fetch('/api/admin/events', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            title: document.getElementById('ad_ev_title').value,
+            event_date: document.getElementById('ad_ev_date').value,
+            description: document.getElementById('ad_ev_desc').value,
+            poster_url: document.getElementById('ad_ev_poster').value,
+            drive_link: document.getElementById('ad_ev_drive').value,
+            gallery_urls: gallery ? gallery.split(',').map(s => s.trim()) : []
+          })
+        });
+        if (res.ok) {
+          alert('Event published successfully!');
+          // Clear inputs
+          document.getElementById('ad_ev_title').value = '';
+          document.getElementById('ad_ev_desc').value = '';
+          document.getElementById('ad_ev_poster').value = '';
+          document.getElementById('ad_ev_drive').value = '';
+          document.getElementById('ad_ev_gallery').value = '';
+          // Instant refetch
+          await fetchEvents();
+        } else {
+          alert('Failed to save event.');
+        }
+      } catch (err) {
+        alert('Error publishing event.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Publish Event';
+      }
     }
 
     function renderAdminEvents() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('admin-events-list').innerHTML = allEvents.map(e => `
+      const tbody = document.getElementById('admin-events-list');
+      if (!tbody) return;
+      tbody.innerHTML = allEvents.map(e => `
         <tr>
           <td>${e.event_date}</td>
           <td>${e.title}</td>
-          <td>${e.event_date >= today ? 'Upcoming' : 'Past'}</td>
+          <td><span style="color: ${e.event_date >= today ? 'var(--gold-light)' : 'var(--text-muted)'}">${e.event_date >= today ? 'Upcoming' : 'Past'}</span></td>
           <td><button class="btn-danger" onclick="deleteEvent(${e.id})">Delete</button></td>
         </tr>
       `).join('');
@@ -533,27 +599,41 @@
     async function deleteEvent(id) {
       if (confirm('Delete this event?')) {
         await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
-        fetchEvents();
+        await fetchEvents();
       }
     }
 
     async function adminSaveFlash(e) {
       e.preventDefault();
-      await fetch('/api/admin/flash-notice', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          title: document.getElementById('fl_title').value,
-          message: document.getElementById('fl_msg').value,
-          image_url: document.getElementById('fl_img').value,
-          start_date: document.getElementById('fl_start').value,
-          end_date: document.getElementById('fl_end').value
-        })
-      });
-      alert('Scheduled Flash Notice saved successfully!');
+      const btn = document.getElementById('fl_submit_btn');
+      btn.disabled = true;
+      btn.innerText = 'Saving Notice...';
+
+      try {
+        const res = await fetch('/api/admin/flash-notice', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            title: document.getElementById('fl_title').value,
+            message: document.getElementById('fl_msg').value,
+            image_url: document.getElementById('fl_img').value,
+            start_date: document.getElementById('fl_start').value,
+            end_date: document.getElementById('fl_end').value
+          })
+        });
+        if (res.ok) {
+          alert('Scheduled Flash Notice saved successfully!');
+        } else {
+          alert('Failed to save flash notice.');
+        }
+      } catch (err) {
+        alert('Error saving notice.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Schedule Announcement';
+      }
     }
 
-    // Init
     window.addEventListener('DOMContentLoaded', () => {
       checkFlashNotice();
       fetchVenuesAndAvailability();
