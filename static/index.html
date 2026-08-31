@@ -172,6 +172,7 @@
         <button class="admin-tab-btn active" onclick="showAdminSection('bookings')">Manage Bookings</button>
         <button class="admin-tab-btn" onclick="showAdminSection('events')">Manage Events & Posters</button>
         <button class="admin-tab-btn" onclick="showAdminSection('flash')">Scheduled Flash Notices</button>
+        <button class="admin-tab-btn" onclick="showAdminSection('members')">Manage Members & Logins</button>
       </div>
 
       <!-- Admin Bookings -->
@@ -244,6 +245,29 @@
           <tbody id="admin-flash-list"></tbody>
         </table>
       </div>
+
+      <!-- Admin Members & Logins Panel -->
+      <div id="admin-sec-members" class="admin-sec" style="display:none;">
+        <div class="luxury-card" style="max-width: 600px;">
+          <h3 class="brand-font" style="margin-bottom: 12px;" id="mem-form-title">Add / Reset Member Account</h3>
+          <form onsubmit="adminSaveMember(event)">
+            <input type="text" id="mem_username" class="form-control" placeholder="Member ID / Username (e.g. SC-1002)" required />
+            <input type="text" id="mem_fullname" class="form-control" placeholder="Member Full Name" required />
+            <input type="password" id="mem_password" class="form-control" placeholder="Assign or Reset Password" required />
+            <select id="mem_role" class="form-control">
+              <option value="member">Member</option>
+              <option value="admin">Administrator</option>
+            </select>
+            <button type="submit" id="mem_submit_btn" class="btn-gold">Save Member Account</button>
+          </form>
+        </div>
+        <h3 class="brand-font" style="margin-top: 24px;">Registered Club Members</h3>
+        <table class="data-table">
+          <thead><tr><th>Username / ID</th><th>Full Name</th><th>Role</th><th>Action</th></tr></thead>
+          <tbody id="admin-members-list"></tbody>
+        </table>
+      </div>
+
     </div>
   </section>
 
@@ -272,6 +296,7 @@
     let currentUser = null;
     let allEvents = [];
     let allFlashNotices = [];
+    let allMembers = [];
     let currentEvView = 'upcoming';
 
     function showTab(id) {
@@ -281,7 +306,7 @@
       if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
       if (id === 'facilities' || id === 'availability' || id === 'admin') fetchVenuesAndAvailability();
       if (id === 'events' || id === 'admin') fetchEvents();
-      if (id === 'admin') fetchAdminFlashNotices();
+      if (id === 'admin') { fetchAdminFlashNotices(); fetchAdminMembers(); }
     }
 
     // Flash Notice Popup
@@ -556,6 +581,7 @@
       document.querySelectorAll('.admin-sec').forEach(s => s.style.display = 'none');
       document.getElementById('admin-sec-' + sec).style.display = 'block';
       if (sec === 'flash') fetchAdminFlashNotices();
+      if (sec === 'members') fetchAdminMembers();
     }
 
     // Admin Events
@@ -722,6 +748,77 @@
       if (confirm('Delete this announcement?')) {
         await fetch(`/api/admin/flash-notices/${id}`, { method: 'DELETE' });
         fetchAdminFlashNotices();
+      }
+    }
+
+    // Admin Member Management
+    async function fetchAdminMembers() {
+      try {
+        const res = await fetch('/api/admin/members');
+        allMembers = await res.json();
+        const tbody = document.getElementById('admin-members-list');
+        if (!tbody) return;
+        tbody.innerHTML = allMembers.map(m => `
+          <tr>
+            <td><strong>${m.username}</strong></td>
+            <td>${m.full_name}</td>
+            <td><span style="color:${m.role === 'admin' ? 'var(--gold-light)' : 'var(--text-muted)'}; font-weight:700;">${m.role.toUpperCase()}</span></td>
+            <td>
+              <button class="btn-edit" onclick="editMember('${m.username}', '${m.full_name}', '${m.role}')">Edit / Reset</button>
+              ${m.username !== 'admin' ? `<button class="btn-danger" onclick="deleteMember(${m.id})">Delete</button>` : ''}
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) { console.error(err); }
+    }
+
+    function editMember(username, fullName, role) {
+      document.getElementById('mem_username').value = username;
+      document.getElementById('mem_fullname').value = fullName;
+      document.getElementById('mem_role').value = role;
+      document.getElementById('mem_password').value = '';
+      document.getElementById('mem_password').placeholder = 'Enter new password to reset';
+      document.getElementById('mem-form-title').innerText = 'Update / Reset Account: ' + username;
+    }
+
+    async function adminSaveMember(e) {
+      e.preventDefault();
+      const btn = document.getElementById('mem_submit_btn');
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+
+      try {
+        const res = await fetch('/api/admin/members', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            username: document.getElementById('mem_username').value.trim(),
+            full_name: document.getElementById('mem_fullname').value.trim(),
+            password: document.getElementById('mem_password').value,
+            role: document.getElementById('mem_role').value
+          })
+        });
+        if (res.ok) {
+          alert('Member account created/updated successfully!');
+          document.getElementById('mem_username').value = '';
+          document.getElementById('mem_fullname').value = '';
+          document.getElementById('mem_password').value = '';
+          document.getElementById('mem-form-title').innerText = 'Add / Reset Member Account';
+          fetchAdminMembers();
+        } else {
+          alert('Failed to save member.');
+        }
+      } catch (err) { alert('Network error'); }
+      finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Member Account';
+      }
+    }
+
+    async function deleteMember(userId) {
+      if (confirm('Delete this member account?')) {
+        await fetch(`/api/admin/members/${userId}`, { method: 'DELETE' });
+        fetchAdminMembers();
       }
     }
 

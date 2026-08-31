@@ -23,17 +23,12 @@ def get_db():
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()
 
-# -------------------------------------------------------------
-# LIFESPAN & AUTO-INITIALIZATION
-# -------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Auto-initialize database tables and default credentials on startup
     if DATABASE_URL:
         try:
             with get_db() as conn:
                 with conn.cursor() as cur:
-                    # Users table
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS users (
                             id SERIAL PRIMARY KEY,
@@ -43,9 +38,6 @@ async def lifespan(app: FastAPI):
                             role VARCHAR(20) DEFAULT 'member',
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
-                    """)
-                    # Events table
-                    cur.execute("""
                         CREATE TABLE IF NOT EXISTS events (
                             id SERIAL PRIMARY KEY,
                             title VARCHAR(150) NOT NULL,
@@ -56,18 +48,12 @@ async def lifespan(app: FastAPI):
                             gallery_urls TEXT[] DEFAULT '{}',
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
-                    """)
-                    # Venues table
-                    cur.execute("""
                         CREATE TABLE IF NOT EXISTS venues (
                             id SERIAL PRIMARY KEY,
                             name VARCHAR(100) UNIQUE NOT NULL,
                             category VARCHAR(50) NOT NULL,
                             capacity INT NOT NULL
                         );
-                    """)
-                    # Bookings table
-                    cur.execute("""
                         CREATE TABLE IF NOT EXISTS bookings (
                             id SERIAL PRIMARY KEY,
                             booker_name VARCHAR(100),
@@ -79,9 +65,6 @@ async def lifespan(app: FastAPI):
                             created_by VARCHAR(50) DEFAULT 'Self',
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
-                    """)
-                    # Flash notices table
-                    cur.execute("""
                         CREATE TABLE IF NOT EXISTS flash_notices (
                             id SERIAL PRIMARY KEY,
                             title VARCHAR(150) NOT NULL,
@@ -94,7 +77,6 @@ async def lifespan(app: FastAPI):
                         );
                     """)
                     
-                    # Seed default venues if empty
                     cur.execute("SELECT COUNT(*) AS cnt FROM venues;")
                     if cur.fetchone()["cnt"] == 0:
                         cur.execute("""
@@ -106,7 +88,6 @@ async def lifespan(app: FastAPI):
                             ('Presidential Cottage 102', 'Guest Accommodation', 6);
                         """)
 
-                    # Seed / Ensure Admin and Member accounts exist with known hashes
                     admin_hash = hash_password("admin123")
                     member_hash = hash_password("member123")
                     
@@ -134,9 +115,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------------------------------------------------------------
-# PYDANTIC DATA MODELS
-# -------------------------------------------------------------
+# Pydantic Models
 class LoginReq(BaseModel):
     username: str
     password: str
@@ -146,10 +125,11 @@ class PasswordChangeReq(BaseModel):
     current_password: str
     new_password: str
 
-class MemberCreateReq(BaseModel):
+class MemberUpsertReq(BaseModel):
     username: str
     full_name: str
     password: str
+    role: Optional[str] = "member"
 
 class BookingCreateReq(BaseModel):
     booker_name: str
@@ -176,9 +156,7 @@ class FlashNoticeReq(BaseModel):
     end_date: str
     is_active: Optional[bool] = True
 
-# -------------------------------------------------------------
-# AUTHENTICATION ENDPOINTS
-# -------------------------------------------------------------
+# 1. AUTHENTICATION & MEMBERS
 @app.post("/api/login")
 def login(req: LoginReq):
     hashed = hash_password(req.password)
@@ -210,25 +188,47 @@ def change_password(req: PasswordChangeReq):
             conn.commit()
             return {"status": "Password changed successfully"}
 
-@app.post("/api/admin/members")
-def admin_create_or_reset_member(req: MemberCreateReq):
-    with get_db() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO users (username, password_hash, full_name, role)
-                VALUES (%s, %s, %s, 'member')
-                ON CONFLICT (username) DO UPDATE 
-                SET password_hash = EXCLUDED.password_hash, full_name = EXCLUDED.full_name;
-                """,
-                (req.username.strip(), hash_password(req.password), req.full_name.strip())
-            )
-            conn.commit()
-            return {"status": "Member account saved successfully"}
+@app.get("/api/admin/members")
+def get_all_members():
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, username, full_name, role, created_at::text FROM users ORDER BY id ASC;")
+                return cur.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-# -------------------------------------------------------------
-# FLASH NOTICES (SCHEDULED)
-# -------------------------------------------------------------
+@app.post("/api/admin/members")
+def admin_upsert_member(req: MemberUpsertReq):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO users (username, password_hash, full_name, role)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (username) DO UPDATE 
+                    SET password_hash = EXCLUDED.password_hash, full_name = EXCLUDED.full_name, role = EXCLUDED.role;
+                    """,
+                    (req.username.strip(), hash_password(req.password), req.full_name.strip(), req.role)
+                )
+                conn.commit()
+                return {"status": "Member updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/admin/members/{user_id}")
+def delete_member(user_id: int):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE id = %s AND username != 'admin';", (user_id,))
+                conn.commit()
+                return {"status": "deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 2. FLASH NOTICES
 @app.get("/api/active-flash-notice")
 def get_active_flash_notice():
     today = date.today().isoformat()
@@ -296,9 +296,7 @@ def delete_flash_notice(notice_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# -------------------------------------------------------------
-# EVENTS ENDPOINTS
-# -------------------------------------------------------------
+# 3. EVENTS
 @app.get("/api/events")
 def get_events():
     try:
@@ -352,9 +350,7 @@ def delete_event(event_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# -------------------------------------------------------------
-# VENUES & BOOKINGS
-# -------------------------------------------------------------
+# 4. VENUES & BOOKINGS
 @app.get("/api/venues-availability")
 def get_availability():
     try:
@@ -386,7 +382,6 @@ def create_booking(req: BookingCreateReq):
                 if not venue:
                     raise HTTPException(status_code=404, detail="Venue not found")
                 
-                # Check for existing booking on that day to prevent double bookings
                 cur.execute(
                     "SELECT id FROM bookings WHERE venue_id = %s AND booking_date = %s;",
                     (venue["id"], req.booking_date)
@@ -420,9 +415,7 @@ def delete_booking(booking_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# -------------------------------------------------------------
-# FRONTEND ROUTE
-# -------------------------------------------------------------
+# 5. FRONTEND
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     path = os.path.join("static", "index.html")
