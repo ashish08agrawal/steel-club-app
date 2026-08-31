@@ -40,10 +40,11 @@
     .nav-links a.active, .nav-links a:hover { color: var(--gold-light); }
 
     /* Buttons */
-    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 9px 20px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: opacity 0.2s; }
+    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 9px 20px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
     .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline { background: transparent; color: var(--gold-light); border: 1px solid var(--gold-primary); padding: 9px 20px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
     .btn-danger { background: rgba(220,53,69,0.2); border: 1px solid var(--danger); color: #ff808a; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+    .btn-edit { background: rgba(212,175,55,0.2); border: 1px solid var(--gold-primary); color: var(--gold-light); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-right: 6px; }
 
     /* Tabs */
     .tab-content { display: none; padding-top: 95px; min-height: 85vh; }
@@ -77,7 +78,7 @@
 </head>
 <body>
 
-  <!-- SCHEDULED FLASH NOTICE MODAL -->
+  <!-- FLASH NOTICE POPUP -->
   <div class="flash-modal-overlay" id="flashModal">
     <div class="flash-modal-box">
       <div class="flash-close" onclick="closeFlashModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -114,7 +115,7 @@
   <main id="tab-home" class="tab-content active-tab">
     <div class="container" style="padding: 80px 0;">
       <h1 class="brand-font" style="font-size: 3rem; margin-bottom: 16px;">Excellence, Heritage & Distinction</h1>
-      <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 24px;">Welcome to Steel Club Durgapur. The premier hub for executive leisure, celebrations, banquets, and guest cottages.</p>
+      <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 24px;">Welcome to Steel Club Durgapur. The premier club for executive leisure, celebrations, banquets, and guest cottages.</p>
       <button class="btn-gold" onclick="showTab('availability')">Check Availability</button>
     </div>
   </main>
@@ -168,12 +169,12 @@
       <h2 class="brand-font" style="color: var(--gold-light); margin-bottom: 20px;">Admin Control Center</h2>
       
       <div class="admin-sub-nav">
-        <button class="admin-tab-btn active" onclick="showAdminSection('bookings')">Manage Bookings (Offline/Online)</button>
-        <button class="admin-tab-btn" onclick="showAdminSection('events')">Manage Events, Posters & Albums</button>
-        <button class="admin-tab-btn" onclick="showAdminSection('flash')">Scheduled Flash Notice</button>
+        <button class="admin-tab-btn active" onclick="showAdminSection('bookings')">Manage Bookings</button>
+        <button class="admin-tab-btn" onclick="showAdminSection('events')">Manage Events & Posters</button>
+        <button class="admin-tab-btn" onclick="showAdminSection('flash')">Scheduled Flash Notices</button>
       </div>
 
-      <!-- Admin Bookings Panel -->
+      <!-- Admin Bookings -->
       <div id="admin-sec-bookings" class="admin-sec">
         <div class="luxury-card">
           <h3 class="brand-font" style="margin-bottom:12px;">Create Booking (Member or Offline/Guest)</h3>
@@ -188,25 +189,27 @@
         </div>
         <h3 class="brand-font" style="margin-top: 24px;">All Booking Records</h3>
         <table class="data-table">
-          <thead>
-            <tr><th>Date</th><th>Venue</th><th>Booker</th><th>Member ID</th><th>Purpose</th><th>Action</th></tr>
-          </thead>
+          <thead><tr><th>Date</th><th>Venue</th><th>Booker</th><th>Member ID</th><th>Purpose</th><th>Action</th></tr></thead>
           <tbody id="admin-bookings-list"></tbody>
         </table>
       </div>
 
-      <!-- Admin Events & Posters Panel -->
+      <!-- Admin Events -->
       <div id="admin-sec-events" class="admin-sec" style="display:none;">
         <div class="luxury-card">
-          <h3 class="brand-font" style="margin-bottom: 12px;">Publish / Update Event</h3>
+          <h3 class="brand-font" style="margin-bottom: 12px;" id="ev-form-title">Publish / Update Event</h3>
           <form onsubmit="adminSaveEvent(event)">
+            <input type="hidden" id="ad_ev_id" value="" />
             <input type="text" id="ad_ev_title" class="form-control" placeholder="Event Title" required />
             <input type="date" id="ad_ev_date" class="form-control" required />
             <textarea id="ad_ev_desc" class="form-control" placeholder="Event Description" rows="3" required></textarea>
-            <input type="url" id="ad_ev_poster" class="form-control" placeholder="Artistic Poster Image URL (Direct .jpg / .png link)" />
-            <input type="url" id="ad_ev_drive" class="form-control" placeholder="Google Drive Folder Link for Full Photo/Video Download" />
-            <input type="text" id="ad_ev_gallery" class="form-control" placeholder="Collage Image URLs (comma separated direct links)" />
-            <button type="submit" id="ad_ev_submit_btn" class="btn-gold">Publish Event</button>
+            <input type="url" id="ad_ev_poster" class="form-control" placeholder="Poster URL (Direct .jpg / .png link)" />
+            <input type="url" id="ad_ev_drive" class="form-control" placeholder="Google Drive Folder Link for Downloads" />
+            <input type="text" id="ad_ev_gallery" class="form-control" placeholder="Collage Image URLs (comma separated links)" />
+            <div style="display:flex; gap:10px;">
+              <button type="submit" id="ad_ev_submit_btn" class="btn-gold">Save Event</button>
+              <button type="button" class="btn-outline" onclick="resetEventForm()">Reset</button>
+            </div>
           </form>
         </div>
         <h3 class="brand-font" style="margin-top: 24px;">Existing Events</h3>
@@ -216,11 +219,12 @@
         </table>
       </div>
 
-      <!-- Admin Scheduled Flash Notice Panel -->
+      <!-- Admin Flash Notices -->
       <div id="admin-sec-flash" class="admin-sec" style="display:none;">
         <div class="luxury-card" style="max-width: 600px;">
-          <h3 class="brand-font" style="margin-bottom: 12px;">Schedule Landing Flash Announcement</h3>
+          <h3 class="brand-font" style="margin-bottom: 12px;" id="flash-form-title">Create / Edit Flash Notice</h3>
           <form onsubmit="adminSaveFlash(event)">
+            <input type="hidden" id="fl_id" value="" />
             <input type="text" id="fl_title" class="form-control" placeholder="Announcement Title" required />
             <textarea id="fl_msg" class="form-control" placeholder="Announcement Message" rows="3" required></textarea>
             <input type="url" id="fl_img" class="form-control" placeholder="Optional Flyer/Poster URL" />
@@ -228,14 +232,22 @@
             <input type="date" id="fl_start" class="form-control" required />
             <label style="font-size:0.75rem; color:var(--gold-light);">Active To Date:</label>
             <input type="date" id="fl_end" class="form-control" required />
-            <button type="submit" id="fl_submit_btn" class="btn-gold">Schedule Announcement</button>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button type="submit" id="fl_submit_btn" class="btn-gold">Save Notice</button>
+              <button type="button" class="btn-outline" onclick="resetFlashForm()">Reset</button>
+            </div>
           </form>
         </div>
+        <h3 class="brand-font" style="margin-top: 24px;">Scheduled Flash Notices</h3>
+        <table class="data-table">
+          <thead><tr><th>From</th><th>To</th><th>Title</th><th>Active</th><th>Action</th></tr></thead>
+          <tbody id="admin-flash-list"></tbody>
+        </table>
       </div>
     </div>
   </section>
 
-  <!-- LOGIN / PASSWORD MODAL -->
+  <!-- LOGIN / CHANGE PASSWORD MODAL -->
   <div class="flash-modal-overlay" id="loginModal">
     <div class="flash-modal-box" style="padding: 30px;">
       <div class="flash-close" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -259,7 +271,7 @@
   <script>
     let currentUser = null;
     let allEvents = [];
-    let allVenues = [];
+    let allFlashNotices = [];
     let currentEvView = 'upcoming';
 
     function showTab(id) {
@@ -269,8 +281,10 @@
       if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
       if (id === 'facilities' || id === 'availability' || id === 'admin') fetchVenuesAndAvailability();
       if (id === 'events' || id === 'admin') fetchEvents();
+      if (id === 'admin') fetchAdminFlashNotices();
     }
 
+    // Flash Notice Popup
     async function checkFlashNotice() {
       try {
         const res = await fetch('/api/active-flash-notice');
@@ -289,6 +303,7 @@
     }
     function closeFlashModal() { document.getElementById('flashModal').style.display = 'none'; }
 
+    // Login & User Session
     function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
     function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
     function togglePasswordChange() {
@@ -306,7 +321,7 @@
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            username: document.getElementById('log_user').value,
+            username: document.getElementById('log_user').value.trim(),
             password: document.getElementById('log_pass').value
           })
         });
@@ -317,7 +332,7 @@
           if (currentUser.role === 'admin') showTab('admin');
           else showTab('availability');
         } else {
-          alert('Invalid credentials');
+          alert('Invalid credentials. Check username/password.');
         }
       } catch (err) { alert('Connection error'); }
       finally {
@@ -342,7 +357,7 @@
           })
         });
         const data = await res.json();
-        if (res.ok) { alert('Password successfully changed'); closeLoginModal(); }
+        if (res.ok) { alert('Password updated!'); closeLoginModal(); }
         else alert(data.detail);
       } catch (err) { alert('Error changing password'); }
       finally { btn.disabled = false; }
@@ -357,11 +372,17 @@
         if (currentUser.role === 'admin') {
           document.getElementById('admin-nav-item').style.display = 'block';
         }
+        if (document.getElementById('bk_member')) {
+          document.getElementById('bk_member').value = currentUser.username;
+        }
+        if (document.getElementById('bk_name')) {
+          document.getElementById('bk_name').value = currentUser.full_name;
+        }
       }
     }
     function logout() { currentUser = null; location.reload(); }
 
-    // Events
+    // Events View & Management
     async function fetchEvents() {
       try {
         const res = await fetch('/api/events');
@@ -413,7 +434,6 @@
       try {
         const res = await fetch('/api/venues-availability');
         const { venues, bookings } = await res.json();
-        allVenues = venues;
 
         const options = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
         document.getElementById('bk_venue').innerHTML = options;
@@ -458,12 +478,11 @@
       } catch (err) { console.error('Error loading venues:', err); }
     }
 
-    // Single Booking Submit Handler with Button Disabling
     async function submitBooking(e) {
       e.preventDefault();
       const btn = document.getElementById('bk_submit_btn');
       btn.disabled = true;
-      btn.innerText = 'Processing Reservation...';
+      btn.innerText = 'Processing...';
 
       try {
         const res = await fetch('/api/book-venue', {
@@ -479,20 +498,18 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert('Booking confirmed and recorded!');
+          alert('Booking confirmed!');
           fetchVenuesAndAvailability();
         } else {
           alert(data.detail || 'Booking failed.');
         }
-      } catch (err) {
-        alert('Network error while processing booking.');
-      } finally {
+      } catch (err) { alert('Network error'); }
+      finally {
         btn.disabled = false;
         btn.innerText = 'Confirm Booking';
       }
     }
 
-    // Admin Create Booking Handler with Button Disabling
     async function adminCreateBooking(e) {
       e.preventDefault();
       const btn = document.getElementById('ad_bk_submit_btn');
@@ -513,14 +530,13 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert('Offline/Admin booking recorded successfully!');
+          alert('Admin booking created!');
           fetchVenuesAndAvailability();
         } else {
-          alert(data.detail || 'Could not save booking.');
+          alert(data.detail || 'Could not save.');
         }
-      } catch (err) {
-        alert('Error saving booking.');
-      } finally {
+      } catch (err) { alert('Network error'); }
+      finally {
         btn.disabled = false;
         btn.innerText = 'Save Booking';
       }
@@ -533,26 +549,30 @@
       }
     }
 
-    // Admin Event Save Handler with Button Disabling & Instant Refresh
+    // Admin Console Sections
     function showAdminSection(sec) {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
       document.querySelectorAll('.admin-sec').forEach(s => s.style.display = 'none');
       document.getElementById('admin-sec-' + sec).style.display = 'block';
+      if (sec === 'flash') fetchAdminFlashNotices();
     }
 
+    // Admin Events
     async function adminSaveEvent(e) {
       e.preventDefault();
       const btn = document.getElementById('ad_ev_submit_btn');
       btn.disabled = true;
-      btn.innerText = 'Publishing Event...';
-
+      btn.innerText = 'Saving...';
       const gallery = document.getElementById('ad_ev_gallery').value;
+      const eventId = document.getElementById('ad_ev_id').value;
+
       try {
         const res = await fetch('/api/admin/events', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
+            id: eventId ? parseInt(eventId) : null,
             title: document.getElementById('ad_ev_title').value,
             event_date: document.getElementById('ad_ev_date').value,
             description: document.getElementById('ad_ev_desc').value,
@@ -562,24 +582,40 @@
           })
         });
         if (res.ok) {
-          alert('Event published successfully!');
-          // Clear inputs
-          document.getElementById('ad_ev_title').value = '';
-          document.getElementById('ad_ev_desc').value = '';
-          document.getElementById('ad_ev_poster').value = '';
-          document.getElementById('ad_ev_drive').value = '';
-          document.getElementById('ad_ev_gallery').value = '';
-          // Instant refetch
+          alert('Event saved successfully!');
+          resetEventForm();
           await fetchEvents();
-        } else {
-          alert('Failed to save event.');
-        }
-      } catch (err) {
-        alert('Error publishing event.');
-      } finally {
+        } else { alert('Error saving event.'); }
+      } catch (err) { alert('Network error.'); }
+      finally {
         btn.disabled = false;
-        btn.innerText = 'Publish Event';
+        btn.innerText = 'Save Event';
       }
+    }
+
+    function editEvent(id) {
+      const ev = allEvents.find(e => e.id === id);
+      if (!ev) return;
+      document.getElementById('ad_ev_id').value = ev.id;
+      document.getElementById('ad_ev_title').value = ev.title;
+      document.getElementById('ad_ev_date').value = ev.event_date;
+      document.getElementById('ad_ev_desc').value = ev.description;
+      document.getElementById('ad_ev_poster').value = ev.poster_url || '';
+      document.getElementById('ad_ev_drive').value = ev.drive_link || '';
+      document.getElementById('ad_ev_gallery').value = (ev.gallery_urls || []).join(', ');
+      document.getElementById('ev-form-title').innerText = 'Edit Event (ID: ' + ev.id + ')';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetEventForm() {
+      document.getElementById('ad_ev_id').value = '';
+      document.getElementById('ad_ev_title').value = '';
+      document.getElementById('ad_ev_date').value = '';
+      document.getElementById('ad_ev_desc').value = '';
+      document.getElementById('ad_ev_poster').value = '';
+      document.getElementById('ad_ev_drive').value = '';
+      document.getElementById('ad_ev_gallery').value = '';
+      document.getElementById('ev-form-title').innerText = 'Publish / Update Event';
     }
 
     function renderAdminEvents() {
@@ -591,7 +627,10 @@
           <td>${e.event_date}</td>
           <td>${e.title}</td>
           <td><span style="color: ${e.event_date >= today ? 'var(--gold-light)' : 'var(--text-muted)'}">${e.event_date >= today ? 'Upcoming' : 'Past'}</span></td>
-          <td><button class="btn-danger" onclick="deleteEvent(${e.id})">Delete</button></td>
+          <td>
+            <button class="btn-edit" onclick="editEvent(${e.id})">Edit</button>
+            <button class="btn-danger" onclick="deleteEvent(${e.id})">Delete</button>
+          </td>
         </tr>
       `).join('');
     }
@@ -603,34 +642,86 @@
       }
     }
 
+    // Admin Flash Notices
+    async function fetchAdminFlashNotices() {
+      try {
+        const res = await fetch('/api/admin/flash-notices');
+        allFlashNotices = await res.json();
+        const tbody = document.getElementById('admin-flash-list');
+        tbody.innerHTML = allFlashNotices.map(n => `
+          <tr>
+            <td>${n.start_date}</td>
+            <td>${n.end_date}</td>
+            <td>${n.title}</td>
+            <td>${n.is_active ? 'Yes' : 'No'}</td>
+            <td>
+              <button class="btn-edit" onclick="editFlashNotice(${n.id})">Edit</button>
+              <button class="btn-danger" onclick="deleteFlashNotice(${n.id})">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) { console.error(err); }
+    }
+
+    function editFlashNotice(id) {
+      const n = allFlashNotices.find(item => item.id === id);
+      if (!n) return;
+      document.getElementById('fl_id').value = n.id;
+      document.getElementById('fl_title').value = n.title;
+      document.getElementById('fl_msg').value = n.message;
+      document.getElementById('fl_img').value = n.image_url || '';
+      document.getElementById('fl_start').value = n.start_date;
+      document.getElementById('fl_end').value = n.end_date;
+      document.getElementById('flash-form-title').innerText = 'Edit Flash Notice (ID: ' + n.id + ')';
+    }
+
+    function resetFlashForm() {
+      document.getElementById('fl_id').value = '';
+      document.getElementById('fl_title').value = '';
+      document.getElementById('fl_msg').value = '';
+      document.getElementById('fl_img').value = '';
+      document.getElementById('fl_start').value = '';
+      document.getElementById('fl_end').value = '';
+      document.getElementById('flash-form-title').innerText = 'Create / Edit Flash Notice';
+    }
+
     async function adminSaveFlash(e) {
       e.preventDefault();
       const btn = document.getElementById('fl_submit_btn');
       btn.disabled = true;
-      btn.innerText = 'Saving Notice...';
+      btn.innerText = 'Saving...';
+      const noticeId = document.getElementById('fl_id').value;
 
       try {
         const res = await fetch('/api/admin/flash-notice', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
+            id: noticeId ? parseInt(noticeId) : null,
             title: document.getElementById('fl_title').value,
             message: document.getElementById('fl_msg').value,
             image_url: document.getElementById('fl_img').value,
             start_date: document.getElementById('fl_start').value,
-            end_date: document.getElementById('fl_end').value
+            end_date: document.getElementById('fl_end').value,
+            is_active: true
           })
         });
         if (res.ok) {
-          alert('Scheduled Flash Notice saved successfully!');
-        } else {
-          alert('Failed to save flash notice.');
-        }
-      } catch (err) {
-        alert('Error saving notice.');
-      } finally {
+          alert('Flash notice saved successfully!');
+          resetFlashForm();
+          fetchAdminFlashNotices();
+        } else { alert('Error saving notice.'); }
+      } catch (err) { alert('Network error.'); }
+      finally {
         btn.disabled = false;
-        btn.innerText = 'Schedule Announcement';
+        btn.innerText = 'Save Notice';
+      }
+    }
+
+    async function deleteFlashNotice(id) {
+      if (confirm('Delete this announcement?')) {
+        await fetch(`/api/admin/flash-notices/${id}`, { method: 'DELETE' });
+        fetchAdminFlashNotices();
       }
     }
 

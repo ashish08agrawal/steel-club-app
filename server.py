@@ -6,7 +6,6 @@ from psycopg.rows import dict_row
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List
 from dotenv import load_dotenv
@@ -31,9 +30,9 @@ def get_db():
     return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    return hashlib.sha256(password.strip().encode()).hexdigest()
 
-# Request Models
+# Models
 class LoginReq(BaseModel):
     username: str
     password: str
@@ -60,51 +59,47 @@ class EventUpsertReq(BaseModel):
     gallery_urls: Optional[List[str]] = []
 
 class FlashNoticeReq(BaseModel):
+    id: Optional[int] = None
     title: str
     message: str
     image_url: Optional[str] = ""
     start_date: str
     end_date: str
+    is_active: Optional[bool] = True
 
-# 1. AUTHENTICATION
+# 1. AUTHENTICATION (Case-insensitive matching)
 @app.post("/api/login")
 def login(req: LoginReq):
     hashed = hash_password(req.password)
-    try:
-        with get_db() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT id, username, full_name, role FROM users WHERE username = %s AND password_hash = %s;",
-                    (req.username, hashed)
-                )
-                user = cur.fetchone()
-                if not user:
-                    raise HTTPException(status_code=401, detail="Invalid username or password")
-                return user
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, username, full_name, role FROM users WHERE LOWER(username) = LOWER(%s) AND password_hash = %s;",
+                (req.username.strip(), hashed)
+            )
+            user = cur.fetchone()
+            if not user:
+                raise HTTPException(status_code=401, detail="Invalid username or password")
+            return user
 
 @app.post("/api/change-password")
 def change_password(req: PasswordChangeReq):
-    try:
-        with get_db() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT id FROM users WHERE username = %s AND password_hash = %s;",
-                    (req.username, hash_password(req.current_password))
-                )
-                if not cur.fetchone():
-                    raise HTTPException(status_code=400, detail="Current password incorrect")
-                cur.execute(
-                    "UPDATE users SET password_hash = %s WHERE username = %s;",
-                    (hash_password(req.new_password), req.username)
-                )
-                conn.commit()
-                return {"status": "Password changed successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM users WHERE LOWER(username) = LOWER(%s) AND password_hash = %s;",
+                (req.username.strip(), hash_password(req.current_password))
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=400, detail="Current password incorrect")
+            cur.execute(
+                "UPDATE users SET password_hash = %s WHERE LOWER(username) = LOWER(%s);",
+                (hash_password(req.new_password), req.username.strip())
+            )
+            conn.commit()
+            return {"status": "Password changed successfully"}
 
-# 2. FLASH NOTICES
+# 2. FLASH NOTICES (With Admin Edit, List & Delete)
 @app.get("/api/active-flash-notice")
 def get_active_flash_notice():
     today = date.today().isoformat()
@@ -121,23 +116,54 @@ def get_active_flash_notice():
                     (today, today)
                 )
                 return cur.fetchone()
-    except Exception as e:
+    except Exception:
         return None
 
-@app.post("/api/admin/flash-notice")
-def create_flash_notice(req: FlashNoticeReq):
+@app.get("/api/admin/flash-notices")
+def get_all_flash_notices():
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO flash_notices (title, message, image_url, start_date, end_date)
-                    VALUES (%s, %s, %s, %s, %s) RETURNING id;
-                    """,
-                    (req.title, req.message, req.image_url, req.start_date, req.end_date)
-                )
+                cur.execute("SELECT id, title, message, image_url, start_date::text, end_date::text, is_active FROM flash_notices ORDER BY id DESC;")
+                return cur.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/flash-notice")
+def save_flash_notice(req: FlashNoticeReq):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                if req.id:
+                    cur.execute(
+                        """
+                        UPDATE flash_notices 
+                        SET title=%s, message=%s, image_url=%s, start_date=%s, end_date=%s, is_active=%s
+                        WHERE id=%s;
+                        """,
+                        (req.title, req.message, req.image_url, req.start_date, req.end_date, req.is_active, req.id)
+                    )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO flash_notices (title, message, image_url, start_date, end_date, is_active)
+                        VALUES (%s, %s, %s, %s, %s, %s);
+                        """,
+                        (req.title, req.message, req.image_url, req.start_date, req.end_date, req.is_active)
+                    )
                 conn.commit()
                 return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/admin/flash-notices/{notice_id}")
+def delete_flash_notice(notice_id: int):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM flash_notices WHERE id = %s;", (notice_id,))
+                conn.commit()
+                return {"status": "deleted"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -147,15 +173,8 @@ def get_events():
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT id, title, event_date::text, description, poster_url, drive_link, gallery_urls 
-                    FROM events 
-                    ORDER BY event_date ASC;
-                    """
-                )
+                cur.execute("SELECT id, title, event_date::text, description, poster_url, drive_link, gallery_urls FROM events ORDER BY event_date ASC;")
                 events = cur.fetchall()
-                # Ensure gallery_urls is always a list in JSON
                 for ev in events:
                     if ev.get("gallery_urls") is None:
                         ev["gallery_urls"] = []
@@ -234,7 +253,6 @@ def create_booking(req: BookingCreateReq):
                 if not venue:
                     raise HTTPException(status_code=404, detail="Venue not found")
                 
-                # Check for existing booking on that day to prevent duplicates
                 cur.execute(
                     "SELECT id FROM bookings WHERE venue_id = %s AND booking_date = %s;",
                     (venue["id"], req.booking_date)
@@ -268,7 +286,7 @@ def delete_booking(booking_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 5. FRONTEND SERVE
+# 5. FRONTEND
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     path = os.path.join("static", "index.html")
