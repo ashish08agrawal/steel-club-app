@@ -31,7 +31,7 @@
     h1, h2, h3, h4, .brand-font { font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    /* Navbar & Official Logo Frame */
+    /* Navbar & Official Logo */
     .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(7, 9, 12, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-gold); padding: 8px 0; }
     .nav-container { display: flex; justify-content: space-between; align-items: center; }
     .brand-wrap { display: flex; align-items: center; gap: 14px; cursor: pointer; text-decoration: none; }
@@ -91,6 +91,10 @@
     .data-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.85rem; }
     .data-table th, .data-table td { padding: 10px; border: 1px solid var(--border-subtle); text-align: left; }
     .data-table th { background: rgba(212,175,55,0.08); color: var(--gold-light); }
+
+    /* Status Badge */
+    .badge-open { color: var(--available-color); background: rgba(46,196,182,0.15); border: 1px solid var(--available-color); padding: 4px 10px; border-radius: 4px; font-weight: 700; }
+    .badge-booked { color: var(--booked-color); background: rgba(224,82,82,0.15); border: 1px solid var(--booked-color); padding: 4px 10px; border-radius: 4px; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -114,13 +118,9 @@
     <div class="container nav-container">
       <div class="brand-wrap" onclick="showTab('home')">
         <div class="logo-container">
-          <!-- Official Steel Club Logo Vector Recreation matching uploaded image -->
           <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Left curved line (S) -->
             <path d="M 33 11 C 23 11 18 21 22 34 C 27 50 48 53 49 63 C 50 72 37 72 29 73 C 29 79 37 78 44 76 C 58 72 58 55 45 47 C 37 42 32 36 32 26 C 32 19 38 15 44 15 Z" fill="#000000" />
-            <!-- Center dot -->
             <circle cx="49" cy="39" r="6.5" fill="#000000" />
-            <!-- Right wing curve (C) -->
             <path d="M 76 39 L 59 43 C 54 47 50 54 51 61 C 53 74 67 87 82 93 C 70 87 59 74 58 61 C 57 54 62 48 68 46 L 76 45 Z" fill="#000000" />
           </svg>
         </div>
@@ -170,26 +170,78 @@
     </div>
   </section>
 
-  <!-- TAB 4: AVAILABILITY & MEMBER BOOKING -->
+  <!-- TAB 4: LIVE AVAILABILITY & MEMBER RESERVATION -->
   <section id="tab-availability" class="tab-content">
     <div class="container" style="padding: 40px 0;">
-      <h2 class="brand-font" style="color: var(--gold-light); margin-bottom: 16px;">Live Availability Matrix</h2>
+      
+      <!-- 1. PUBLIC VENUE & DATE AVAILABILITY CHECKER -->
+      <div class="luxury-card" style="border-left: 3px solid var(--gold-primary); margin-bottom: 30px;">
+        <h3 class="brand-font" style="color: var(--gold-light); margin-bottom: 8px;">Check Date & Venue Availability</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">Select any venue and date to inspect live reservation status:</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; align-items: end;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--gold-light); font-weight:600;">Choose Venue / Room / Hall:</label>
+            <select id="check_venue_select" class="form-control" style="margin-bottom:0;" onchange="performAvailabilityCheck()"></select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--gold-light); font-weight:600;">Choose Date:</label>
+            <input type="date" id="check_date_input" class="form-control" style="margin-bottom:0;" onchange="performAvailabilityCheck()" />
+          </div>
+          <div>
+            <button class="btn-gold" style="width:100%; height:44px; justify-content:center;" onclick="performAvailabilityCheck()">
+              <i class="fa-solid fa-magnifying-glass"></i> Check Status
+            </button>
+          </div>
+        </div>
+
+        <div id="check_result_box" style="display:none; margin-top: 18px; padding: 14px; background: rgba(0,0,0,0.4); border-radius: 6px;"></div>
+      </div>
+
+      <!-- 2. LIVE 7-DAY AVAILABILITY MATRIX -->
+      <h3 class="brand-font" style="color: var(--gold-light); margin-bottom: 12px;">7-Day Live Availability Matrix</h3>
       <div style="overflow-x:auto;">
         <table class="data-table" id="availability-table">
           <thead id="avail-head"></thead>
           <tbody id="avail-body"></tbody>
         </table>
       </div>
-      <div style="margin-top: 30px;" id="member-booking-panel">
-        <h3 class="brand-font" style="color: var(--gold-light); margin-bottom: 12px;">Reserve Venue</h3>
-        <form onsubmit="submitBooking(event)" class="luxury-card" style="max-width: 500px;">
-          <input type="text" id="bk_name" class="form-control" placeholder="Booker Name" required />
-          <input type="text" id="bk_member" class="form-control" placeholder="Member ID (e.g. SC-1001)" required />
-          <select id="bk_venue" class="form-control" required></select>
-          <input type="date" id="bk_date" class="form-control" required />
-          <input type="text" id="bk_purpose" class="form-control" placeholder="Purpose (e.g. Family Get-Together)" required />
-          <button type="submit" id="bk_submit_btn" class="btn-gold" style="width: 100%; justify-content: center;">Confirm Booking</button>
-        </form>
+
+      <!-- 3. MEMBER RESERVATION AREA (UNLOCKED ONLY ON LOGIN) -->
+      <div style="margin-top: 40px;">
+        
+        <!-- PROMPT WHEN GUEST / NOT LOGGED IN -->
+        <div id="guest-booking-prompt" class="luxury-card" style="text-align: center; padding: 40px 20px; border: 1px dashed var(--gold-primary);">
+          <i class="fa-solid fa-lock" style="font-size: 2.2rem; color: var(--gold-primary); margin-bottom: 14px;"></i>
+          <h3 class="brand-font" style="color: #fff; margin-bottom: 8px;">Member Login Required To Reserve</h3>
+          <p style="color: var(--text-muted); font-size: 0.92rem; max-width: 500px; margin: 0 auto 20px;">
+            Venue bookings are reserved exclusively for Steel Club members and executive committee. Please log in with your Member ID to book.
+          </p>
+          <button class="btn-gold" onclick="openLoginModal()"><i class="fa-solid fa-user-lock"></i> Member Login</button>
+        </div>
+
+        <!-- UNLOCKED BOOKING PANEL (VISIBLE ONLY FOR LOGGED IN USERS) -->
+        <div id="member-booking-panel" style="display:none;">
+          <h3 class="brand-font" style="color: var(--gold-light); margin-bottom: 12px;">
+            <i class="fa-solid fa-calendar-check" style="color:var(--gold-primary);"></i> Member Venue Reservation
+          </h3>
+          <form onsubmit="submitBooking(event)" class="luxury-card" style="max-width: 550px;">
+            <label style="font-size:0.75rem; color:var(--gold-light);">Member Name:</label>
+            <input type="text" id="bk_name" class="form-control" placeholder="Booker Name" required />
+            <label style="font-size:0.75rem; color:var(--gold-light);">Member ID:</label>
+            <input type="text" id="bk_member" class="form-control" placeholder="Member ID" readonly required />
+            <label style="font-size:0.75rem; color:var(--gold-light);">Select Venue:</label>
+            <select id="bk_venue" class="form-control" required></select>
+            <label style="font-size:0.75rem; color:var(--gold-light);">Select Reservation Date:</label>
+            <input type="date" id="bk_date" class="form-control" required />
+            <label style="font-size:0.75rem; color:var(--gold-light);">Event Purpose:</label>
+            <input type="text" id="bk_purpose" class="form-control" placeholder="e.g., Anniversary Dinner, Official Conference" required />
+            <button type="submit" id="bk_submit_btn" class="btn-gold" style="width: 100%; justify-content: center;">
+              Confirm Venue Reservation
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
   </section>
@@ -206,7 +258,7 @@
         <button class="admin-tab-btn" onclick="showAdminSection('members')">Manage Members & Logins</button>
       </div>
 
-      <!-- Admin Bookings -->
+      <!-- Admin Bookings (Offline & Online Management) -->
       <div id="admin-sec-bookings" class="admin-sec">
         <div class="luxury-card">
           <h3 class="brand-font" style="margin-bottom:12px;">Create Booking (Member or Offline/Guest)</h3>
@@ -328,6 +380,8 @@
     let allEvents = [];
     let allFlashNotices = [];
     let allMembers = [];
+    let allVenues = [];
+    let allBookings = [];
     let currentEvView = 'upcoming';
 
     function showTab(id) {
@@ -426,12 +480,14 @@
         if (currentUser.role === 'admin') {
           document.getElementById('admin-nav-item').style.display = 'block';
         }
-        if (document.getElementById('bk_member')) {
-          document.getElementById('bk_member').value = currentUser.username;
-        }
-        if (document.getElementById('bk_name')) {
-          document.getElementById('bk_name').value = currentUser.full_name;
-        }
+        // Unlock booking panel for logged-in users
+        document.getElementById('guest-booking-prompt').style.display = 'none';
+        document.getElementById('member-booking-panel').style.display = 'block';
+        document.getElementById('bk_member').value = currentUser.username;
+        document.getElementById('bk_name').value = currentUser.full_name;
+      } else {
+        document.getElementById('guest-booking-prompt').style.display = 'block';
+        document.getElementById('member-booking-panel').style.display = 'none';
       }
     }
     function logout() { currentUser = null; location.reload(); }
@@ -482,15 +538,26 @@
       }).join('');
     }
 
+    // Availability & Bookings
     async function fetchVenuesAndAvailability() {
       try {
         const res = await fetch('/api/venues-availability');
         const { venues, bookings } = await res.json();
+        allVenues = venues;
+        allBookings = bookings;
 
+        // Populate dropdowns
         const options = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
+        document.getElementById('check_venue_select').innerHTML = options;
         document.getElementById('bk_venue').innerHTML = options;
         document.getElementById('ad_bk_venue').innerHTML = options;
 
+        // Set default date for checker
+        if (!document.getElementById('check_date_input').value) {
+          document.getElementById('check_date_input').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Facilities Grid
         document.getElementById('facilities-grid').innerHTML = venues.map(v => `
           <div class="luxury-card">
             <h3 class="brand-font" style="color:var(--gold-light);">${v.name}</h3>
@@ -499,6 +566,7 @@
           </div>
         `).join('');
 
+        // Generate 7-Day Live Matrix
         const dates = [];
         const today = new Date();
         for (let i = 0; i < 7; i++) {
@@ -506,7 +574,7 @@
           dates.push(d.toISOString().split('T')[0]);
         }
 
-        document.getElementById('avail-head').innerHTML = `<tr><th>Venue</th>${dates.map(d => `<th>${d.slice(5)}</th>`).join('')}</tr>`;
+        document.getElementById('avail-head').innerHTML = `<tr><th>Venue / Room / Hall</th>${dates.map(d => `<th>${d.slice(5)}</th>`).join('')}</tr>`;
         document.getElementById('avail-body').innerHTML = venues.map(v => `
           <tr>
             <td><strong>${v.name}</strong></td>
@@ -517,6 +585,7 @@
           </tr>
         `).join('');
 
+        // Admin Bookings List
         document.getElementById('admin-bookings-list').innerHTML = bookings.map(b => `
           <tr>
             <td>${b.booking_date}</td>
@@ -530,11 +599,55 @@
       } catch (err) { console.error('Error loading venues:', err); }
     }
 
+    // Public Venue Availability Checker
+    function performAvailabilityCheck() {
+      const selectedVenueName = document.getElementById('check_venue_select').value;
+      const selectedDate = document.getElementById('check_date_input').value;
+      const resultBox = document.getElementById('check_result_box');
+
+      if (!selectedVenueName || !selectedDate) return;
+
+      const venueObj = allVenues.find(v => v.name === selectedVenueName);
+      if (!venueObj) return;
+
+      const isBooked = allBookings.some(b => b.venue_id === venueObj.id && b.booking_date.startsWith(selectedDate));
+      
+      resultBox.style.display = 'block';
+      if (isBooked) {
+        resultBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:#fff;">${venueObj.name}</strong> on <span style="color:var(--gold-light);">${selectedDate}</span>
+              <div style="color:var(--text-muted); font-size:0.8rem;">Capacity: Up to ${venueObj.capacity} guests</div>
+            </div>
+            <span class="badge-booked"><i class="fa-solid fa-circle-xmark"></i> Already Booked</span>
+          </div>
+        `;
+      } else {
+        resultBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:#fff;">${venueObj.name}</strong> on <span style="color:var(--gold-light);">${selectedDate}</span>
+              <div style="color:var(--text-muted); font-size:0.8rem;">Capacity: Up to ${venueObj.capacity} guests</div>
+            </div>
+            <span class="badge-open"><i class="fa-solid fa-circle-check"></i> Available / Open</span>
+          </div>
+        `;
+      }
+    }
+
+    // Member Reservation Submit
     async function submitBooking(e) {
       e.preventDefault();
+      if (!currentUser) {
+        alert('Please log in with your member credentials to make a booking.');
+        openLoginModal();
+        return;
+      }
+
       const btn = document.getElementById('bk_submit_btn');
       btn.disabled = true;
-      btn.innerText = 'Processing...';
+      btn.innerText = 'Processing Reservation...';
 
       try {
         const res = await fetch('/api/book-venue', {
@@ -542,7 +655,7 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             booker_name: document.getElementById('bk_name').value,
-            member_id: document.getElementById('bk_member').value,
+            member_id: currentUser.username,
             venue_name: document.getElementById('bk_venue').value,
             booking_date: document.getElementById('bk_date').value,
             purpose: document.getElementById('bk_purpose').value
@@ -550,18 +663,21 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert('Booking confirmed!');
-          fetchVenuesAndAvailability();
+          alert('Venue reservation successfully confirmed!');
+          document.getElementById('bk_purpose').value = '';
+          await fetchVenuesAndAvailability();
+          performAvailabilityCheck();
         } else {
           alert(data.detail || 'Booking failed.');
         }
       } catch (err) { alert('Network error'); }
       finally {
         btn.disabled = false;
-        btn.innerText = 'Confirm Booking';
+        btn.innerText = 'Confirm Venue Reservation';
       }
     }
 
+    // Admin Create Booking
     async function adminCreateBooking(e) {
       e.preventDefault();
       const btn = document.getElementById('ad_bk_submit_btn');
@@ -601,6 +717,7 @@
       }
     }
 
+    // Admin Console Sections
     function showAdminSection(sec) {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
@@ -610,6 +727,7 @@
       if (sec === 'members') fetchAdminMembers();
     }
 
+    // Admin Events
     async function adminSaveEvent(e) {
       e.preventDefault();
       const btn = document.getElementById('ad_ev_submit_btn');
@@ -693,6 +811,7 @@
       }
     }
 
+    // Admin Flash Notices
     async function fetchAdminFlashNotices() {
       try {
         const res = await fetch('/api/admin/flash-notices');
@@ -775,6 +894,7 @@
       }
     }
 
+    // Admin Member Management
     async function fetchAdminMembers() {
       try {
         const res = await fetch('/api/admin/members');
