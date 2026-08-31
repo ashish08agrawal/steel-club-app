@@ -31,10 +31,23 @@
     h1, h2, h3, h4, .brand-font { font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    /* Nav */
-    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(7, 9, 12, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-gold); padding: 12px 0; }
+    /* Navbar & Logo */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(7, 9, 12, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-gold); padding: 10px 0; }
     .nav-container { display: flex; justify-content: space-between; align-items: center; }
-    .brand-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; text-decoration: none; }
+    .logo-crest {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(16, 19, 26, 0.95) 75%);
+      border: 1.5px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 14px rgba(212, 175, 55, 0.35);
+    }
+    .logo-crest i { color: var(--gold-light); font-size: 1.25rem; }
     .nav-links { display: flex; gap: 20px; list-style: none; }
     .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; cursor: pointer; }
     .nav-links a.active, .nav-links a:hover { color: var(--gold-light); }
@@ -96,7 +109,13 @@
   <nav class="navbar">
     <div class="container nav-container">
       <div class="brand-wrap" onclick="showTab('home')">
-        <h2 class="brand-font" style="font-size: 1.1rem; color: #fff;">STEEL CLUB <span style="color: var(--gold-primary); font-size: 0.7rem; display:block;">DURGAPUR</span></h2>
+        <div class="logo-crest">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div>
+          <h2 class="brand-font" style="font-size: 1.05rem; color: #fff; line-height: 1.1; margin: 0;">STEEL CLUB</h2>
+          <span style="color: var(--gold-primary); font-size: 0.68rem; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase;">DURGAPUR</span>
+        </div>
       </div>
       <ul class="nav-links">
         <li><a onclick="showTab('home')" id="nav-home" class="active">Home</a></li>
