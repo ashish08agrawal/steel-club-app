@@ -1,6 +1,7 @@
 import os
 import hashlib
 from datetime import date
+from contextlib import asynccontextmanager
 import psycopg
 from psycopg.rows import dict_row
 from fastapi import FastAPI, HTTPException
@@ -12,7 +13,118 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Steel Club Enterprise Portal")
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_db():
+    if not DATABASE_URL:
+        raise HTTPException(status_code=500, detail="DATABASE_URL not configured")
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()
+
+# -------------------------------------------------------------
+# LIFESPAN & AUTO-INITIALIZATION
+# -------------------------------------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Auto-initialize database tables and default credentials on startup
+    if DATABASE_URL:
+        try:
+            with get_db() as conn:
+                with conn.cursor() as cur:
+                    # Users table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS users (
+                            id SERIAL PRIMARY KEY,
+                            username VARCHAR(50) UNIQUE NOT NULL,
+                            password_hash VARCHAR(255) NOT NULL,
+                            full_name VARCHAR(100) NOT NULL,
+                            role VARCHAR(20) DEFAULT 'member',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                    """)
+                    # Events table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS events (
+                            id SERIAL PRIMARY KEY,
+                            title VARCHAR(150) NOT NULL,
+                            event_date DATE NOT NULL,
+                            description TEXT,
+                            poster_url TEXT,
+                            drive_link TEXT,
+                            gallery_urls TEXT[] DEFAULT '{}',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                    """)
+                    # Venues table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS venues (
+                            id SERIAL PRIMARY KEY,
+                            name VARCHAR(100) UNIQUE NOT NULL,
+                            category VARCHAR(50) NOT NULL,
+                            capacity INT NOT NULL
+                        );
+                    """)
+                    # Bookings table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS bookings (
+                            id SERIAL PRIMARY KEY,
+                            booker_name VARCHAR(100),
+                            member_id VARCHAR(50),
+                            venue_id INT REFERENCES venues(id) ON DELETE CASCADE,
+                            booking_date DATE NOT NULL,
+                            purpose VARCHAR(255),
+                            status VARCHAR(20) DEFAULT 'Confirmed',
+                            created_by VARCHAR(50) DEFAULT 'Self',
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                    """)
+                    # Flash notices table
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS flash_notices (
+                            id SERIAL PRIMARY KEY,
+                            title VARCHAR(150) NOT NULL,
+                            message TEXT NOT NULL,
+                            image_url TEXT,
+                            start_date DATE NOT NULL,
+                            end_date DATE NOT NULL,
+                            is_active BOOLEAN DEFAULT TRUE,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                    """)
+                    
+                    # Seed default venues if empty
+                    cur.execute("SELECT COUNT(*) AS cnt FROM venues;")
+                    if cur.fetchone()["cnt"] == 0:
+                        cur.execute("""
+                            INSERT INTO venues (name, category, capacity) VALUES
+                            ('Grand Banquet Hall', 'Banquet & Celebrations', 350),
+                            ('Executive Lounge & Bar', 'Lounge & Dining', 80),
+                            ('Poolside Green Lawn', 'Open Air Lawns', 500),
+                            ('Deluxe Guest Suite 101', 'Guest Accommodation', 4),
+                            ('Presidential Cottage 102', 'Guest Accommodation', 6);
+                        """)
+
+                    # Seed / Ensure Admin and Member accounts exist with known hashes
+                    admin_hash = hash_password("admin123")
+                    member_hash = hash_password("member123")
+                    
+                    cur.execute("""
+                        INSERT INTO users (username, password_hash, full_name, role)
+                        VALUES 
+                        ('admin', %s, 'Club Administrator', 'admin'),
+                        ('SC-1001', %s, 'Ashish Agrawal', 'member')
+                        ON CONFLICT (username) DO UPDATE 
+                        SET password_hash = EXCLUDED.password_hash;
+                    """, (admin_hash, member_hash))
+                    
+                    conn.commit()
+        except Exception as e:
+            print(f"Startup DB init notice: {e}")
+    yield
+
+app = FastAPI(title="Steel Club Enterprise Portal", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,17 +134,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-def get_db():
-    if not DATABASE_URL:
-        raise HTTPException(status_code=500, detail="DATABASE_URL not configured")
-    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.strip().encode()).hexdigest()
-
-# Models
+# -------------------------------------------------------------
+# PYDANTIC DATA MODELS
+# -------------------------------------------------------------
 class LoginReq(BaseModel):
     username: str
     password: str
@@ -41,6 +145,11 @@ class PasswordChangeReq(BaseModel):
     username: str
     current_password: str
     new_password: str
+
+class MemberCreateReq(BaseModel):
+    username: str
+    full_name: str
+    password: str
 
 class BookingCreateReq(BaseModel):
     booker_name: str
@@ -67,7 +176,9 @@ class FlashNoticeReq(BaseModel):
     end_date: str
     is_active: Optional[bool] = True
 
-# 1. AUTHENTICATION (Case-insensitive matching)
+# -------------------------------------------------------------
+# AUTHENTICATION ENDPOINTS
+# -------------------------------------------------------------
 @app.post("/api/login")
 def login(req: LoginReq):
     hashed = hash_password(req.password)
@@ -99,7 +210,25 @@ def change_password(req: PasswordChangeReq):
             conn.commit()
             return {"status": "Password changed successfully"}
 
-# 2. FLASH NOTICES (With Admin Edit, List & Delete)
+@app.post("/api/admin/members")
+def admin_create_or_reset_member(req: MemberCreateReq):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO users (username, password_hash, full_name, role)
+                VALUES (%s, %s, %s, 'member')
+                ON CONFLICT (username) DO UPDATE 
+                SET password_hash = EXCLUDED.password_hash, full_name = EXCLUDED.full_name;
+                """,
+                (req.username.strip(), hash_password(req.password), req.full_name.strip())
+            )
+            conn.commit()
+            return {"status": "Member account saved successfully"}
+
+# -------------------------------------------------------------
+# FLASH NOTICES (SCHEDULED)
+# -------------------------------------------------------------
 @app.get("/api/active-flash-notice")
 def get_active_flash_notice():
     today = date.today().isoformat()
@@ -167,7 +296,9 @@ def delete_flash_notice(notice_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 3. EVENTS
+# -------------------------------------------------------------
+# EVENTS ENDPOINTS
+# -------------------------------------------------------------
 @app.get("/api/events")
 def get_events():
     try:
@@ -221,7 +352,9 @@ def delete_event(event_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 4. VENUES & BOOKINGS
+# -------------------------------------------------------------
+# VENUES & BOOKINGS
+# -------------------------------------------------------------
 @app.get("/api/venues-availability")
 def get_availability():
     try:
@@ -253,6 +386,7 @@ def create_booking(req: BookingCreateReq):
                 if not venue:
                     raise HTTPException(status_code=404, detail="Venue not found")
                 
+                # Check for existing booking on that day to prevent double bookings
                 cur.execute(
                     "SELECT id FROM bookings WHERE venue_id = %s AND booking_date = %s;",
                     (venue["id"], req.booking_date)
@@ -286,7 +420,9 @@ def delete_booking(booking_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 5. FRONTEND
+# -------------------------------------------------------------
+# FRONTEND ROUTE
+# -------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     path = os.path.join("static", "index.html")
