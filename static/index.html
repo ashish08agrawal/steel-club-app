@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Steel Club Durgapur | Exclusive Club Portal</title>
+  <title>Steel Club Durgapur | Management & Member Portal</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,419 +14,548 @@
     :root {
       --bg-primary: #07090c;
       --bg-surface: #10131a;
-      --bg-card: rgba(18, 22, 31, 0.75);
+      --bg-card: rgba(18, 22, 31, 0.85);
       --gold-primary: #d4af37;
       --gold-light: #f7e7a9;
       --gold-gradient: linear-gradient(135deg, #f7e7a9 0%, #d4af37 50%, #8a6805 100%);
       --text-main: #f5f6f8;
       --text-muted: #9ba3af;
-      --border-gold: rgba(212, 175, 55, 0.28);
+      --border-gold: rgba(212, 175, 55, 0.3);
       --border-subtle: rgba(255, 255, 255, 0.08);
       --booked-color: #e05252;
       --available-color: #2ec4b6;
-      --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      --danger: #dc3545;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background-color: var(--bg-primary); color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.6; }
     h1, h2, h3, h4, .brand-font { font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-
-    /* Header & Navigation */
-    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(7, 9, 12, 0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-gold); padding: 12px 0; }
+    /* Nav */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(7, 9, 12, 0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-gold); padding: 12px 0; }
     .nav-container { display: flex; justify-content: space-between; align-items: center; }
-    .brand-logo-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
-    .club-logo-svg { width: 44px; height: 44px; filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4)); }
-    .nav-links { display: flex; gap: 24px; list-style: none; }
-    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: var(--transition); }
-    .nav-links a:hover, .nav-links a.active { color: var(--gold-light); }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .nav-links { display: flex; gap: 20px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; cursor: pointer; }
+    .nav-links a.active, .nav-links a:hover { color: var(--gold-light); }
 
     /* Buttons */
-    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 10px 22px; border-radius: 4px; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; border: none; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4); }
-    .btn-outline { background: transparent; color: var(--gold-light); border: 1px solid var(--gold-primary); padding: 10px 22px; border-radius: 4px; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; cursor: pointer; transition: var(--transition); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-outline:hover { background: rgba(212, 175, 55, 0.1); color: #fff; }
+    .btn-gold { background: var(--gold-gradient); color: #07090c; padding: 9px 20px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-outline { background: transparent; color: var(--gold-light); border: 1px solid var(--gold-primary); padding: 9px 20px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-danger { background: rgba(220,53,69,0.2); border: 1px solid var(--danger); color: #ff808a; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
 
     /* Tabs */
-    .tab-content { display: none; padding-top: 100px; min-height: 80vh; animation: fadeIn 0.3s ease; }
+    .tab-content { display: none; padding-top: 95px; min-height: 85vh; }
     .tab-content.active-tab { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Hero */
-    .hero { padding: 90px 0 60px; }
-    .hero-title { font-size: 3.4rem; line-height: 1.15; margin-bottom: 20px; background: linear-gradient(135deg, #ffffff 40%, var(--gold-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    /* Flash Notice Modal */
+    .flash-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; }
+    .flash-modal-box { background: var(--bg-surface); border: 2px solid var(--gold-primary); border-radius: 12px; max-width: 550px; width: 100%; position: relative; overflow: hidden; box-shadow: 0 0 40px rgba(212,175,55,0.3); }
+    .flash-close { position: absolute; top: 12px; right: 14px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--border-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
 
-    /* Section Styles */
-    .section-pad { padding: 60px 0; }
-    .section-header { text-align: center; max-width: 650px; margin: 0 auto 30px; }
-    .section-subtitle { color: var(--gold-primary); font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 8px; display: block; }
-    .section-title { font-size: 2.2rem; color: #fff; }
+    /* Admin Sub-tabs */
+    .admin-sub-nav { display: flex; gap: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .admin-tab-btn { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+    .admin-tab-btn.active { background: var(--gold-gradient); color: #07090c; font-weight: 700; border-color: var(--gold-primary); }
 
-    /* Event Sub-Tab Toggle Buttons */
-    .event-toggle-bar { display: flex; justify-content: center; gap: 16px; margin-bottom: 36px; }
-    .event-sub-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 8px 24px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: var(--transition); }
-    .event-sub-btn.active-sub { background: var(--gold-gradient); color: #07090c; border-color: var(--gold-primary); }
+    /* Cards & Form */
+    .luxury-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 24px; backdrop-filter: blur(8px); margin-bottom: 20px; }
+    .form-control { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid var(--border-subtle); border-radius: 4px; color: #fff; margin-bottom: 14px; outline: none; }
+    .form-control:focus { border-color: var(--gold-primary); }
 
-    /* Cards */
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
-    .luxury-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 24px; backdrop-filter: blur(10px); transition: var(--transition); position: relative; }
-    .luxury-card:hover { transform: translateY(-4px); border-color: var(--border-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .card-title { font-size: 1.25rem; color: #fff; margin: 10px 0 6px; }
-    .card-desc { color: var(--text-muted); font-size: 0.92rem; }
+    /* Event Posters & Collages */
+    .poster-img { width: 100%; height: 220px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; }
+    .photo-collage { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 12px 0; }
+    .photo-collage img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; }
 
-    /* Photo Collage Grid */
-    .photo-collage { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0; border-radius: 8px; overflow: hidden; }
-    .photo-collage img { width: 100%; height: 110px; object-fit: cover; border-radius: 4px; transition: transform 0.3s; }
-    .photo-collage img:hover { transform: scale(1.05); }
-
-    /* Live Calendar Matrix */
-    .calendar-matrix-wrapper { overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; }
-    .calendar-matrix { width: 100%; border-collapse: collapse; min-width: 650px; }
-    .calendar-matrix th, .calendar-matrix td { padding: 14px 10px; text-align: center; border-bottom: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); font-size: 0.85rem; }
-    .calendar-matrix th { background: rgba(212, 175, 55, 0.08); color: var(--gold-light); }
-    .venue-col { text-align: left !important; font-weight: 600; color: #fff; padding-left: 18px !important; }
-    .status-badge { padding: 5px 12px; border-radius: 14px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; display: inline-block; }
-    .status-available { background: rgba(46, 196, 182, 0.15); color: var(--available-color); border: 1px solid rgba(46, 196, 182, 0.4); }
-    .status-booked { background: rgba(224, 82, 82, 0.15); color: var(--booked-color); border: 1px solid rgba(224, 82, 82, 0.4); }
-
-    /* Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
-    .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--bg-surface); border: 1px solid var(--border-gold); border-radius: 10px; width: 100%; max-width: 480px; padding: 32px; position: relative; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.78rem; text-transform: uppercase; color: var(--gold-light); margin-bottom: 6px; letter-spacing: 0.08em; }
-    .form-control { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid var(--border-subtle); border-radius: 4px; color: #fff; font-family: inherit; outline: none; }
-
-    footer { border-top: 1px solid var(--border-gold); padding: 40px 0 20px; text-align: center; font-size: 0.82rem; color: var(--text-muted); margin-top: 60px; }
-
-    @media (max-width: 850px) {
-      .hero-title { font-size: 2.4rem; }
-      .nav-links { display: none; }
-    }
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.85rem; }
+    .data-table th, .data-table td { padding: 10px; border: 1px solid var(--border-subtle); text-align: left; }
+    .data-table th { background: rgba(212,175,55,0.08); color: var(--gold-light); }
   </style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="container nav-container">
-      <div class="brand-logo-wrap" onclick="showTab('home')">
-        <svg class="club-logo-svg" viewBox="0 0 100 120" fill="none">
-          <defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0bd"/><stop offset="50%" stop-color="#d4af37"/><stop offset="100%" stop-color="#7c5c00"/></linearGradient></defs>
-          <path d="M 35 15 C 22 20 23 35 34 50 C 47 68 53 78 38 88 C 50 82 54 65 42 50 C 30 35 30 22 35 15 Z" fill="url(#goldGrad)" />
-          <circle cx="51" cy="45" r="9" fill="url(#goldGrad)" />
-          <path d="M 72 43 C 58 45 55 52 56 60 C 58 78 70 95 78 112 C 65 92 50 72 50 56 C 50 42 62 42 72 43 Z" fill="url(#goldGrad)" />
-        </svg>
-        <div>
-          <div style="font-weight:700; font-size:1.15rem;">STEEL CLUB</div>
-          <div style="font-size:0.65rem; letter-spacing:0.25em; color:var(--gold-primary);">DURGAPUR</div>
-        </div>
+  <!-- SCHEDULED FLASH NOTICE MODAL -->
+  <div class="flash-modal-overlay" id="flashModal">
+    <div class="flash-modal-box">
+      <div class="flash-close" onclick="closeFlashModal()"><i class="fa-solid fa-xmark"></i></div>
+      <img id="flash-img" style="width: 100%; max-height: 250px; object-fit: cover; display: none;" />
+      <div style="padding: 24px;">
+        <span style="color:var(--gold-primary); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; font-weight:700;">Club Announcement</span>
+        <h2 id="flash-title" class="brand-font" style="color: #fff; margin: 6px 0 12px;"></h2>
+        <p id="flash-message" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 18px;"></p>
+        <button class="btn-gold" style="width: 100%; justify-content: center;" onclick="closeFlashModal()">Dismiss Notice</button>
       </div>
-      <ul class="nav-links">
-        <li><a onclick="showTab('home')" id="nav-home" class="active">Home</a></li>
-        <li><a onclick="showTab('about')" id="nav-about">About</a></li>
-        <li><a onclick="showTab('facilities')" id="nav-facilities">Facilities</a></li>
-        <li><a onclick="showTab('events')" id="nav-events">Events & Gallery</a></li>
-        <li><a onclick="showTab('availability')" id="nav-availability">Venue Availability</a></li>
-      </ul>
-      <button class="btn-gold" onclick="openModal()"><i class="fa-solid fa-crown"></i> Member Booking</button>
-    </div>
-  </nav>
-
-  <main id="tab-home" class="tab-content active-tab">
-    <div class="container hero">
-      <h1 class="hero-title">A Heritage of Distinction & Hospitality</h1>
-      <p style="color:var(--text-muted); max-width:620px; margin-bottom:28px; font-size:1.05rem;">
-        Welcome to Steel Club Durgapur. The premier club for executive leisure, celebrations, banquet halls, and guest accommodations.
-      </p>
-      <div style="display:flex; gap:14px; flex-wrap:wrap;">
-        <button class="btn-gold" onclick="showTab('availability')"><i class="fa-solid fa-calendar-check"></i> Check Live Availability</button>
-        <button class="btn-outline" onclick="openModal()">Book Venue</button>
-      </div>
-    </div>
-  </main>
-
-  <section id="tab-about" class="tab-content">
-    <div class="container section-pad">
-      <div class="section-header">
-        <span class="section-subtitle">Heritage</span>
-        <h2 class="section-title">About Steel Club</h2>
-      </div>
-      <div class="luxury-card" style="max-width: 800px; margin: 0 auto;">
-        <p class="card-desc" style="margin-bottom: 16px; font-size: 1rem;">
-          Established as an executive center for camaraderie and distinction, Steel Club Durgapur offers premier dining, landscaped banquet spaces, and deluxe accommodation.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-facilities" class="tab-content">
-    <div class="container section-pad">
-      <div class="section-header">
-        <span class="section-subtitle">Club Venues</span>
-        <h2 class="section-title">Halls, Lawns & Cottages</h2>
-      </div>
-      <div class="cards-grid" id="facilities-container">
-        <p style="color:var(--text-muted)">Loading facilities...</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-events" class="tab-content">
-    <div class="container section-pad">
-      <div class="section-header">
-        <span class="section-subtitle">Memories & Schedule</span>
-        <h2 class="section-title">Club Events & Galas</h2>
-      </div>
-
-      <div class="event-toggle-bar">
-        <button class="event-sub-btn active-sub" id="btn-upcoming" onclick="toggleEventType('upcoming')">
-          <i class="fa-regular fa-calendar-plus"></i> Upcoming Events
-        </button>
-        <button class="event-sub-btn" id="btn-past" onclick="toggleEventType('past')">
-          <i class="fa-solid fa-clock-rotate-left"></i> Past Events & Memories
-        </button>
-      </div>
-
-      <div class="cards-grid" id="events-container">
-        <p style="color:var(--text-muted)">Loading events from database...</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-availability" class="tab-content">
-    <div class="container section-pad">
-      <div class="section-header">
-        <span class="section-subtitle">Live Schedule</span>
-        <h2 class="section-title">Real-Time Venue Availability</h2>
-      </div>
-      <div class="calendar-matrix-wrapper">
-        <table class="calendar-matrix">
-          <thead id="availability-head"></thead>
-          <tbody id="availability-body">
-            <tr><td colspan="8" style="text-align:center; padding:20px;">Connecting to database...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <div class="modal-overlay" id="bookingModal">
-    <div class="modal-box">
-      <h3 class="brand-font" style="color:var(--gold-light); margin-bottom:12px;">Member Booking</h3>
-      <form onsubmit="submitBooking(event)">
-        <div class="form-group">
-          <label>Member ID</label>
-          <input type="text" id="bm_member" class="form-control" placeholder="e.g. SC-1048" required />
-        </div>
-        <div class="form-group">
-          <label>Select Venue</label>
-          <select id="bm_venue" class="form-control" required>
-            <option value="">-- Loading venues... --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Booking Date</label>
-          <input type="date" id="bm_date" class="form-control" required />
-        </div>
-        <div class="form-group">
-          <label>Purpose of Reservation</label>
-          <input type="text" id="bm_purpose" class="form-control" placeholder="e.g. Family Gala / Guest Stay" required />
-        </div>
-        <div style="display:flex; gap:10px; margin-top:16px;">
-          <button type="submit" class="btn-gold" style="flex:1; justify-content:center;">Confirm Booking</button>
-          <button type="button" class="btn-outline" onclick="closeModal()">Cancel</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 Steel Club Durgapur. All database records synchronized live with Neon Postgres.</p>
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="brand-wrap" onclick="showTab('home')">
+        <h2 class="brand-font" style="font-size: 1.1rem; color: #fff;">STEEL CLUB <span style="color: var(--gold-primary); font-size: 0.7rem; display:block;">DURGAPUR</span></h2>
+      </div>
+      <ul class="nav-links">
+        <li><a onclick="showTab('home')" id="nav-home" class="active">Home</a></li>
+        <li><a onclick="showTab('facilities')" id="nav-facilities">Facilities</a></li>
+        <li><a onclick="showTab('events')" id="nav-events">Events & Gallery</a></li>
+        <li><a onclick="showTab('availability')" id="nav-availability">Live Availability</a></li>
+        <li id="admin-nav-item" style="display:none;"><a onclick="showTab('admin')" id="nav-admin" style="color: var(--gold-light); font-weight:700;"><i class="fa-solid fa-shield-halved"></i> Admin Console</a></li>
+      </ul>
+      <div id="auth-actions">
+        <button class="btn-gold" onclick="openLoginModal()"><i class="fa-solid fa-user-lock"></i> Portal Login</button>
+      </div>
     </div>
-  </footer>
+  </nav>
+
+  <!-- TAB 1: HOME -->
+  <main id="tab-home" class="tab-content active-tab">
+    <div class="container" style="padding: 80px 0;">
+      <h1 class="brand-font" style="font-size: 3rem; margin-bottom: 16px;">Excellence, Heritage & Distinction</h1>
+      <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 24px;">Welcome to Steel Club Durgapur. The premier club for executive leisure, celebrations, banquets, and guest cottages.</p>
+      <button class="btn-gold" onclick="showTab('availability')">Check Availability</button>
+    </div>
+  </main>
+
+  <!-- TAB 2: FACILITIES -->
+  <section id="tab-facilities" class="tab-content">
+    <div class="container" style="padding: 40px 0;">
+      <h2 class="brand-font" style="color: var(--gold-light); margin-bottom: 20px;">Club Venues & Suites</h2>
+      <div id="facilities-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;"></div>
+    </div>
+  </section>
+
+  <!-- TAB 3: EVENTS (UPCOMING vs PAST) -->
+  <section id="tab-events" class="tab-content">
+    <div class="container" style="padding: 40px 0;">
+      <div style="display:flex; justify-content:center; gap: 14px; margin-bottom: 30px;">
+        <button class="btn-gold" id="btn-ev-up" onclick="toggleEventView('upcoming')">Upcoming Events</button>
+        <button class="btn-outline" id="btn-ev-past" onclick="toggleEventView('past')">Past Events & Album</button>
+      </div>
+      <div id="events-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;"></div>
+    </div>
+  </section>
+
+  <!-- TAB 4: AVAILABILITY & MEMBER BOOKING -->
+  <section id="tab-availability" class="tab-content">
+    <div class="container" style="padding: 40px 0;">
+      <h2 class="brand-font" style="color: var(--gold-light); margin-bottom: 16px;">Live Availability Matrix</h2>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="availability-table">
+          <thead id="avail-head"></thead>
+          <tbody id="avail-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top: 30px;" id="member-booking-panel">
+        <h3 class="brand-font" style="color: var(--gold-light); margin-bottom: 12px;">Reserve Venue</h3>
+        <form onsubmit="submitBooking(event)" class="luxury-card" style="max-width: 500px;">
+          <input type="text" id="bk_name" class="form-control" placeholder="Booker Name" required />
+          <input type="text" id="bk_member" class="form-control" placeholder="Member ID (e.g. SC-1001)" required />
+          <select id="bk_venue" class="form-control" required></select>
+          <input type="date" id="bk_date" class="form-control" required />
+          <input type="text" id="bk_purpose" class="form-control" placeholder="Purpose (e.g. Family Get-Together)" required />
+          <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">Confirm Booking</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: ADMIN MANAGEMENT CONSOLE -->
+  <section id="tab-admin" class="tab-content">
+    <div class="container" style="padding: 40px 0;">
+      <h2 class="brand-font" style="color: var(--gold-light); margin-bottom: 20px;">Admin Control Center</h2>
+      
+      <div class="admin-sub-nav">
+        <button class="admin-tab-btn active" onclick="showAdminSection('bookings')">Manage Bookings (Offline/Online)</button>
+        <button class="admin-tab-btn" onclick="showAdminSection('events')">Manage Events, Posters & Albums</button>
+        <button class="admin-tab-btn" onclick="showAdminSection('flash')">Scheduled Flash Notice</button>
+      </div>
+
+      <!-- Admin Bookings Panel -->
+      <div id="admin-sec-bookings" class="admin-sec">
+        <div class="luxury-card">
+          <h3 class="brand-font" style="margin-bottom:12px;">Create Booking (Member or Offline/Guest)</h3>
+          <form onsubmit="adminCreateBooking(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <input type="text" id="ad_bk_name" class="form-control" placeholder="Booker Name" required />
+            <input type="text" id="ad_bk_member" class="form-control" placeholder="Member ID or 'GUEST'" value="GUEST" required />
+            <select id="ad_bk_venue" class="form-control" required></select>
+            <input type="date" id="ad_bk_date" class="form-control" required />
+            <input type="text" id="ad_bk_purpose" class="form-control" placeholder="Purpose" required />
+            <button type="submit" class="btn-gold" style="height: 42px;">Save Booking</button>
+          </form>
+        </div>
+        <h3 class="brand-font" style="margin-top: 24px;">All Booking Records</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>Date</th><th>Venue</th><th>Booker</th><th>Member ID</th><th>Purpose</th><th>Action</th></tr>
+          </thead>
+          <tbody id="admin-bookings-list"></tbody>
+        </table>
+      </div>
+
+      <!-- Admin Events & Posters Panel -->
+      <div id="admin-sec-events" class="admin-sec" style="display:none;">
+        <div class="luxury-card">
+          <h3 class="brand-font" style="margin-bottom: 12px;">Publish / Update Event</h3>
+          <form onsubmit="adminSaveEvent(event)">
+            <input type="text" id="ad_ev_title" class="form-control" placeholder="Event Title" required />
+            <input type="date" id="ad_ev_date" class="form-control" required />
+            <textarea id="ad_ev_desc" class="form-control" placeholder="Event Description" rows="3" required></textarea>
+            <input type="url" id="ad_ev_poster" class="form-control" placeholder="Poster Image URL (Cloudinary / ImgBB direct link)" />
+            <input type="url" id="ad_ev_drive" class="form-control" placeholder="Google Drive Folder Link for Full Photo/Video Download" />
+            <input type="text" id="ad_ev_gallery" class="form-control" placeholder="Collage Image URLs (comma separated links)" />
+            <button type="submit" class="btn-gold">Publish Event</button>
+          </form>
+        </div>
+        <h3 class="brand-font" style="margin-top: 24px;">Existing Events</h3>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Title</th><th>Type</th><th>Action</th></tr></thead>
+          <tbody id="admin-events-list"></tbody>
+        </table>
+      </div>
+
+      <!-- Admin Scheduled Flash Notice Panel -->
+      <div id="admin-sec-flash" class="admin-sec" style="display:none;">
+        <div class="luxury-card" style="max-width: 600px;">
+          <h3 class="brand-font" style="margin-bottom: 12px;">Schedule Landing Flash Announcement</h3>
+          <form onsubmit="adminSaveFlash(event)">
+            <input type="text" id="fl_title" class="form-control" placeholder="Announcement Title" required />
+            <textarea id="fl_msg" class="form-control" placeholder="Announcement Message" rows="3" required></textarea>
+            <input type="url" id="fl_img" class="form-control" placeholder="Optional Flyer/Poster URL" />
+            <label style="font-size:0.75rem; color:var(--gold-light);">Active From Date:</label>
+            <input type="date" id="fl_start" class="form-control" required />
+            <label style="font-size:0.75rem; color:var(--gold-light);">Active To Date:</label>
+            <input type="date" id="fl_end" class="form-control" required />
+            <button type="submit" class="btn-gold">Schedule Announcement</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGIN / PASSWORD MODAL -->
+  <div class="flash-modal-overlay" id="loginModal">
+    <div class="flash-modal-box" style="padding: 30px;">
+      <div class="flash-close" onclick="closeLoginModal()"><i class="fa-solid fa-xmark"></i></div>
+      <h3 class="brand-font" style="color:var(--gold-light); margin-bottom: 16px;">Portal Login</h3>
+      <form onsubmit="handleLogin(event)">
+        <input type="text" id="log_user" class="form-control" placeholder="Member ID or Username (e.g. SC-1001 or admin)" required />
+        <input type="password" id="log_pass" class="form-control" placeholder="Password" required />
+        <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">Sign In</button>
+      </form>
+      <div style="border-top: 1px solid var(--border-subtle); margin-top: 20px; padding-top: 14px;">
+        <small style="color:var(--text-muted); cursor:pointer;" onclick="togglePasswordChange()">Need to change your password?</small>
+        <form id="change-pass-form" style="display:none; margin-top:10px;" onsubmit="handleChangePassword(event)">
+          <input type="password" id="cp_old" class="form-control" placeholder="Current Password" required />
+          <input type="password" id="cp_new" class="form-control" placeholder="New Password" required />
+          <button type="submit" class="btn-outline" style="width: 100%; justify-content: center;">Update Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let allEventsData = [];
-    let currentEventView = 'upcoming'; // 'upcoming' or 'past'
+    let currentUser = null;
+    let allEvents = [];
+    let allVenues = [];
+    let currentEvView = 'upcoming';
 
+    // 1. Navigation & Tabs
     function showTab(id) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-      document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
-      
-      const target = document.getElementById('tab-' + id);
-      const navTarget = document.getElementById('nav-' + id);
-      if (target) target.classList.add('active-tab');
-      if (navTarget) navTarget.classList.add('active');
-
-      if (id === 'facilities' || id === 'availability') fetchVenuesAndAvailability();
+      document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active-tab'));
+      document.querySelectorAll('.nav-links a').forEach(e => e.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active-tab');
+      if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
+      if (id === 'facilities' || id === 'availability' || id === 'admin') fetchVenuesAndAvailability();
       if (id === 'events') fetchEvents();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function openModal() {
-      document.getElementById('bookingModal').classList.add('active');
-      fetchVenuesAndAvailability();
+    // 2. Scheduled Flash Notice Check on Page Load
+    async function checkFlashNotice() {
+      try {
+        const res = await fetch('/api/active-flash-notice');
+        const notice = await res.json();
+        if (notice) {
+          document.getElementById('flash-title').innerText = notice.title;
+          document.getElementById('flash-message').innerText = notice.message;
+          if (notice.image_url) {
+            const img = document.getElementById('flash-img');
+            img.src = notice.image_url;
+            img.style.display = 'block';
+          }
+          document.getElementById('flashModal').style.display = 'flex';
+        }
+      } catch (err) { console.error(err); }
+    }
+    function closeFlashModal() { document.getElementById('flashModal').style.display = 'none'; }
+
+    // 3. Authentication
+    function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+    function togglePasswordChange() {
+      const f = document.getElementById('change-pass-form');
+      f.style.display = f.style.display === 'none' ? 'block' : 'none';
     }
 
-    function closeModal() {
-      document.getElementById('bookingModal').classList.remove('active');
+    async function handleLogin(e) {
+      e.preventDefault();
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: document.getElementById('log_user').value,
+          password: document.getElementById('log_pass').value
+        })
+      });
+      if (res.ok) {
+        currentUser = await res.json();
+        closeLoginModal();
+        updateAuthUI();
+        if (currentUser.role === 'admin') {
+          showTab('admin');
+        } else {
+          showTab('availability');
+        }
+      } else {
+        alert('Invalid credentials');
+      }
     }
 
-    // Toggle between Upcoming and Past Events
-    function toggleEventType(type) {
-      currentEventView = type;
-      document.getElementById('btn-upcoming').classList.toggle('active-sub', type === 'upcoming');
-      document.getElementById('btn-past').classList.toggle('active-sub', type === 'past');
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      if (!currentUser) return alert('Please login first');
+      const res = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: currentUser.username,
+          current_password: document.getElementById('cp_old').value,
+          new_password: document.getElementById('cp_new').value
+        })
+      });
+      const data = await res.json();
+      if (res.ok) { alert('Password successfully changed'); closeLoginModal(); }
+      else alert(data.detail);
+    }
+
+    function updateAuthUI() {
+      if (currentUser) {
+        document.getElementById('auth-actions').innerHTML = `
+          <span style="color:var(--gold-light); font-size:0.85rem; margin-right:10px;">${currentUser.full_name} (${currentUser.role})</span>
+          <button class="btn-outline" onclick="logout()">Logout</button>
+        `;
+        if (currentUser.role === 'admin') {
+          document.getElementById('admin-nav-item').style.display = 'block';
+        }
+      }
+    }
+    function logout() { currentUser = null; location.reload(); }
+
+    // 4. Events & Dynamic Shifts
+    async function fetchEvents() {
+      const res = await fetch('/api/events');
+      allEvents = await res.json();
+      renderEvents();
+      renderAdminEvents();
+    }
+
+    function toggleEventView(view) {
+      currentEvView = view;
+      document.getElementById('btn-ev-up').className = view === 'upcoming' ? 'btn-gold' : 'btn-outline';
+      document.getElementById('btn-ev-past').className = view === 'past' ? 'btn-gold' : 'btn-outline';
       renderEvents();
     }
 
-    // Fetch Events from Backend
-    async function fetchEvents() {
-      try {
-        const res = await fetch('/api/events');
-        allEventsData = await res.json();
-        renderEvents();
-      } catch (err) {
-        console.error("Error loading events:", err);
-      }
-    }
-
-    // Render Events with Gallery Collage & Google Drive Download Link
     function renderEvents() {
-      const container = document.getElementById('events-container');
       const today = new Date().toISOString().split('T')[0];
-
-      // Filter based on event_date vs Today
-      const filtered = allEventsData.filter(ev => {
-        if (currentEventView === 'upcoming') {
-          return ev.event_date >= today;
-        } else {
-          return ev.event_date < today;
-        }
-      });
+      const grid = document.getElementById('events-grid');
+      const filtered = allEvents.filter(e => currentEvView === 'upcoming' ? e.event_date >= today : e.event_date < today);
 
       if (filtered.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">No ${currentEventView} events found in records.</p>`;
+        grid.innerHTML = `<p style="color:var(--text-muted)">No ${currentEvView} events found.</p>`;
         return;
       }
 
-      container.innerHTML = filtered.map(ev => {
-        // Build collage if photos exist
-        let collageHTML = '';
-        if (ev.gallery_urls && ev.gallery_urls.length > 0) {
-          collageHTML = `
-            <div class="photo-collage">
-              ${ev.gallery_urls.slice(0, 4).map(img => `<img src="${img}" alt="Event Memory" loading="lazy" />`).join('')}
-            </div>
-          `;
-        } else if (ev.image_url) {
-          collageHTML = `<img src="${ev.image_url}" alt="${ev.title}" style="width:100%; height:160px; object-fit:cover; border-radius:6px; margin:12px 0;" />`;
-        }
-
-        // Google Drive Download Button (for Past Events or any event with a link)
-        let downloadBtn = '';
-        if (ev.drive_link) {
-          downloadBtn = `
-            <a href="${ev.drive_link}" target="_blank" class="btn-outline" style="width:100%; justify-content:center; margin-top:14px; font-size:0.78rem;">
-              <i class="fa-brands fa-google-drive"></i> Download Photos & Videos
-            </a>
-          `;
-        }
+      grid.innerHTML = filtered.map(ev => {
+        let poster = ev.poster_url ? `<img src="${ev.poster_url}" class="poster-img" />` : '';
+        let collage = (ev.gallery_urls && ev.gallery_urls.length > 0) ? `
+          <div class="photo-collage">${ev.gallery_urls.slice(0, 4).map(u => `<img src="${u}">`).join('')}</div>
+        ` : '';
+        let drive = ev.drive_link ? `<a href="${ev.drive_link}" target="_blank" class="btn-outline" style="width:100%; justify-content:center; margin-top:10px;"><i class="fa-brands fa-google-drive"></i> Download Photos/Videos</a>` : '';
 
         return `
           <div class="luxury-card">
-            <span style="color:var(--gold-primary); font-size:0.8rem; font-weight:700; text-transform:uppercase;">
-              <i class="fa-regular fa-calendar"></i> ${ev.event_date}
-            </span>
-            <h3 class="card-title">${ev.title}</h3>
-            <p class="card-desc">${ev.description || ''}</p>
-            ${collageHTML}
-            ${downloadBtn}
+            ${poster}
+            <span style="color:var(--gold-primary); font-size:0.8rem; font-weight:700;">${ev.event_date}</span>
+            <h3 class="brand-font" style="margin: 6px 0;">${ev.title}</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">${ev.description}</p>
+            ${collage}
+            ${drive}
           </div>
         `;
       }).join('');
     }
 
-    // Live Venues & Calendar Logic
-    function getNextDates(count = 7) {
+    // 5. Live Venue Availability & Matrix
+    async function fetchVenuesAndAvailability() {
+      const res = await fetch('/api/venues-availability');
+      const { venues, bookings } = await res.json();
+      allVenues = venues;
+
+      // Populate Dropdowns
+      const options = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
+      document.getElementById('bk_venue').innerHTML = options;
+      document.getElementById('ad_bk_venue').innerHTML = options;
+
+      // Render Facilities
+      document.getElementById('facilities-grid').innerHTML = venues.map(v => `
+        <div class="luxury-card">
+          <h3 class="brand-font" style="color:var(--gold-light);">${v.name}</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Category: ${v.category}</p>
+          <p>Capacity: Up to ${v.capacity} Guests</p>
+        </div>
+      `).join('');
+
+      // Generate 7-Day Matrix
       const dates = [];
       const today = new Date();
-      for (let i = 0; i < count; i++) {
-        const d = new Date();
-        d.setDate(today.getDate() + i);
-        dates.push({
-          iso: d.toISOString().split('T')[0],
-          display: d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
-          dayName: d.toLocaleDateString('en-US', { weekday: 'short' })
-        });
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(); d.setDate(today.getDate() + i);
+        dates.push(d.toISOString().split('T')[0]);
       }
-      return dates;
+
+      document.getElementById('avail-head').innerHTML = `<tr><th>Venue</th>${dates.map(d => `<th>${d.slice(5)}</th>`).join('')}</tr>`;
+      document.getElementById('avail-body').innerHTML = venues.map(v => `
+        <tr>
+          <td><strong>${v.name}</strong></td>
+          ${dates.map(d => {
+            const isBooked = bookings.some(b => b.venue_id === v.id && b.booking_date.startsWith(d));
+            return `<td><span style="color:${isBooked ? 'var(--booked-color)' : 'var(--available-color)'}; font-weight:700;">${isBooked ? 'Booked' : 'Open'}</span></td>`;
+          }).join('')}
+        </tr>
+      `).join('');
+
+      // Render Admin Bookings List
+      document.getElementById('admin-bookings-list').innerHTML = bookings.map(b => `
+        <tr>
+          <td>${b.booking_date}</td>
+          <td>${b.venue_name}</td>
+          <td>${b.booker_name}</td>
+          <td>${b.member_id}</td>
+          <td>${b.purpose}</td>
+          <td><button class="btn-danger" onclick="deleteBooking(${b.id})">Delete</button></td>
+        </tr>
+      `).join('');
     }
 
-    async function fetchVenuesAndAvailability() {
-      try {
-        const res = await fetch('/api/venues-availability');
-        const { venues, bookings } = await res.json();
-        const dynamicDates = getNextDates(7);
-
-        const facilitiesCont = document.getElementById('facilities-container');
-        if (facilitiesCont && venues.length > 0) {
-          facilitiesCont.innerHTML = venues.map(v => `
-            <div class="luxury-card">
-              <div style="font-size:1.8rem; color:var(--gold-primary); margin-bottom:12px;">
-                <i class="fa-solid ${v.category.toLowerCase().includes('cottage') || v.category.toLowerCase().includes('room') ? 'fa-hotel' : 'fa-landmark'}"></i>
-              </div>
-              <h3 class="card-title">${v.name}</h3>
-              <p class="card-desc" style="color:var(--gold-light); font-weight:600; font-size:0.85rem; margin-bottom:6px;">Category: ${v.category}</p>
-              <p class="card-desc">Capacity: Accommodates up to <strong>${v.capacity}</strong> guests.</p>
-            </div>
-          `).join('');
-        }
-
-        const venueSelect = document.getElementById('bm_venue');
-        if (venueSelect) {
-          venueSelect.innerHTML = venues.map(v => `<option value="${v.name}">${v.name} (${v.category})</option>`).join('');
-        }
-
-        const thead = document.getElementById('availability-head');
-        thead.innerHTML = `<tr><th class="venue-col">Venue Name</th>${dynamicDates.map(d => `<th>${d.display}<br><small style="color:var(--text-muted)">${d.dayName}</small></th>`).join('')}</tr>`;
-
-        const tbody = document.getElementById('availability-body');
-        tbody.innerHTML = venues.map(v => {
-          let cols = dynamicDates.map(d => {
-            const isBooked = bookings.some(b => b.venue_id === v.id && b.booking_date.startsWith(d.iso));
-            return `<td><span class="status-badge ${isBooked ? 'status-booked' : 'status-available'}">${isBooked ? 'Booked' : 'Open'}</span></td>`;
-          }).join('');
-          return `<tr><td class="venue-col">${v.name}</td>${cols}</tr>`;
-        }).join('');
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
+    // 6. Booking Actions
     async function submitBooking(e) {
       e.preventDefault();
-      const payload = {
-        member_id: document.getElementById('bm_member').value,
-        venue_name: document.getElementById('bm_venue').value,
-        booking_date: document.getElementById('bm_date').value,
-        purpose: document.getElementById('bm_purpose').value
-      };
-      const res = await fetch('/api/book-venue', {
+      await fetch('/api/book-venue', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          booker_name: document.getElementById('bk_name').value,
+          member_id: document.getElementById('bk_member').value,
+          venue_name: document.getElementById('bk_venue').value,
+          booking_date: document.getElementById('bk_date').value,
+          purpose: document.getElementById('bk_purpose').value
+        })
       });
-      if (res.ok) {
-        alert('Booking recorded successfully!');
-        closeModal();
+      alert('Booking submitted successfully!');
+      fetchVenuesAndAvailability();
+    }
+
+    async function adminCreateBooking(e) {
+      e.preventDefault();
+      await fetch('/api/book-venue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          booker_name: document.getElementById('ad_bk_name').value,
+          member_id: document.getElementById('ad_bk_member').value,
+          venue_name: document.getElementById('ad_bk_venue').value,
+          booking_date: document.getElementById('ad_bk_date').value,
+          purpose: document.getElementById('ad_bk_purpose').value
+        })
+      });
+      alert('Admin booking created');
+      fetchVenuesAndAvailability();
+    }
+
+    async function deleteBooking(id) {
+      if (confirm('Delete this reservation?')) {
+        await fetch(`/api/admin/bookings/${id}`, { method: 'DELETE' });
         fetchVenuesAndAvailability();
       }
     }
 
+    // 7. Admin Event & Flash Management
+    function showAdminSection(sec) {
+      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.admin-sec').forEach(s => s.style.display = 'none');
+      document.getElementById('admin-sec-' + sec).style.display = 'block';
+    }
+
+    async function adminSaveEvent(e) {
+      e.preventDefault();
+      const gallery = document.getElementById('ad_ev_gallery').value;
+      await fetch('/api/admin/events', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: document.getElementById('ad_ev_title').value,
+          event_date: document.getElementById('ad_ev_date').value,
+          description: document.getElementById('ad_ev_desc').value,
+          poster_url: document.getElementById('ad_ev_poster').value,
+          drive_link: document.getElementById('ad_ev_drive').value,
+          gallery_urls: gallery ? gallery.split(',').map(s => s.trim()) : []
+        })
+      });
+      alert('Event saved!');
+      fetchEvents();
+    }
+
+    function renderAdminEvents() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('admin-events-list').innerHTML = allEvents.map(e => `
+        <tr>
+          <td>${e.event_date}</td>
+          <td>${e.title}</td>
+          <td>${e.event_date >= today ? 'Upcoming' : 'Past'}</td>
+          <td><button class="btn-danger" onclick="deleteEvent(${e.id})">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteEvent(id) {
+      if (confirm('Delete this event?')) {
+        await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+        fetchEvents();
+      }
+    }
+
+    async function adminSaveFlash(e) {
+      e.preventDefault();
+      await fetch('/api/admin/flash-notice', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: document.getElementById('fl_title').value,
+          message: document.getElementById('fl_msg').value,
+          image_url: document.getElementById('fl_img').value,
+          start_date: document.getElementById('fl_start').value,
+          end_date: document.getElementById('fl_end').value
+        })
+      });
+      alert('Scheduled Flash Notice saved successfully!');
+    }
+
+    // Init
     window.addEventListener('DOMContentLoaded', () => {
+      checkFlashNotice();
       fetchVenuesAndAvailability();
       fetchEvents();
     });
